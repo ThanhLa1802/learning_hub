@@ -62,6 +62,9 @@ export interface AdminLesson {
     title: string; content_type: string; order_index: number
     estimated_minutes: number; is_active: boolean
 }
+export interface AdminLessonPage {
+    items: AdminLesson[]; total: number; page: number; pages: number
+}
 export interface AdminLessonDetail extends AdminLesson {
     content: string; category_id?: string
 }
@@ -78,7 +81,7 @@ export const adminApi = {
     updateCourse: (id: string, data: Partial<AdminCourse>) => api.put<AdminCourse>(`/admin/courses/${id}`, data),
 
     // Lessons
-    getLessons: (courseId?: string) => api.get<AdminLesson[]>('/admin/lessons', { params: courseId ? { course_id: courseId } : {} }),
+    getLessons: (courseId?: string, page = 1) => api.get<AdminLessonPage>('/admin/lessons', { params: { ...(courseId ? { course_id: courseId } : {}), page } }),
     getLessonDetail: (id: string) => api.get<AdminLessonDetail & { content: string }>(`/admin/lessons/${id}`),
     createLesson: (data: Omit<AdminLessonDetail, 'id' | 'course_name' | 'domain_name'>) => api.post<AdminLessonDetail>('/admin/lessons', data),
     updateLesson: (id: string, data: Partial<AdminLessonDetail>) => api.put<AdminLessonDetail>(`/admin/lessons/${id}`, data),

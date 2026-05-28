@@ -1300,6 +1300,7 @@ def seed_translations(session: Session) -> None:
 def seed_database(session: Session) -> None:
     from app.db.seed_react import seed_react
     from app.db.seed_go import seed_go
+    from app.db.seed_llm import seed_llm
 
     seed_english_content(session)
     _, course_map = seed_domains_and_courses(session)
@@ -1308,4 +1309,5 @@ def seed_database(session: Session) -> None:
     seed_system_design(session, course_map)
     seed_react(session)
     seed_go(session)
+    seed_llm(session)
     seed_translations(session)

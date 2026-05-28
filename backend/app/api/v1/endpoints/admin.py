@@ -1,6 +1,8 @@
+import math
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import func
 from sqlmodel import Session, select
 
 from app.api.v1.deps import CurrentUser, SessionDep
@@ -16,6 +18,7 @@ from app.schemas.admin import (
     DomainUpdate,
     LessonAdminResponse,
     LessonCreate,
+    LessonListResponse,
     LessonUpdate,
 )
 
@@ -110,12 +113,31 @@ def update_course(course_id: uuid.UUID, body: CourseUpdate, session: SessionDep,
 
 # ─── Lessons ─────────────────────────────────────────────────────────────────
 
-@router.get("/lessons", response_model=list[LessonAdminResponse])
-def list_lessons(session: SessionDep, _: User = AdminDep, course_id: uuid.UUID | None = None):
-    query = select(Lesson)
+LESSON_PAGE_SIZE = 15
+
+
+@router.get("/lessons", response_model=LessonListResponse)
+def list_lessons(
+    session: SessionDep,
+    _: User = AdminDep,
+    course_id: uuid.UUID | None = None,
+    page: int = 1,
+):
+    base_query = select(Lesson)
     if course_id:
-        query = query.where(Lesson.course_id == course_id)
-    lessons = session.exec(query.order_by(Lesson.order_index)).all()
+        base_query = base_query.where(Lesson.course_id == course_id)
+
+    count_query = select(func.count()).select_from(base_query.subquery())
+    total: int = session.exec(count_query).one()
+    pages = math.ceil(total / LESSON_PAGE_SIZE) or 1
+    page = max(1, min(page, pages))
+
+    lessons = session.exec(
+        base_query.order_by(Lesson.order_index)
+        .offset((page - 1) * LESSON_PAGE_SIZE)
+        .limit(LESSON_PAGE_SIZE)
+    ).all()
+
     result = []
     for l in lessons:
         course = session.get(Course, l.course_id)
@@ -131,7 +153,7 @@ def list_lessons(session: SessionDep, _: User = AdminDep, course_id: uuid.UUID |
             estimated_minutes=l.estimated_minutes,
             is_active=l.is_active,
         ))
-    return result
+    return LessonListResponse(items=result, total=total, page=page, pages=pages)
 
 
 @router.get("/lessons/{lesson_id}")

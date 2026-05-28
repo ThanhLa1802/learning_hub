@@ -98,3 +98,10 @@ class LessonAdminResponse(BaseModel):
     order_index: int
     estimated_minutes: int
     is_active: bool
+
+
+class LessonListResponse(BaseModel):
+    items: list[LessonAdminResponse]
+    total: int
+    page: int
+    pages: int

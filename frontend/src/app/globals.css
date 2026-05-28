@@ -127,6 +127,7 @@
   }
 
   html {
+    font-size: 20px; /* 125% of 16px default — scales all rem-based sizes */
     @apply font-sans;
   }
 }

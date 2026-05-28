@@ -3,23 +3,23 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Globe, BookOpen, FileText, PlusCircle } from 'lucide-react'
-import { adminApi, AdminDomain, AdminCourse, AdminLesson } from '@/lib/apiClient'
+import { adminApi, AdminDomain, AdminCourse } from '@/lib/apiClient'
 
 export default function AdminDashboard() {
     const [domains, setDomains] = useState<AdminDomain[]>([])
     const [courses, setCourses] = useState<AdminCourse[]>([])
-    const [lessons, setLessons] = useState<AdminLesson[]>([])
+    const [lessonTotal, setLessonTotal] = useState(0)
 
     useEffect(() => {
         adminApi.getDomains().then((r) => setDomains(r.data))
         adminApi.getCourses().then((r) => setCourses(r.data))
-        adminApi.getLessons().then((r) => setLessons(r.data))
+        adminApi.getLessons().then((r) => setLessonTotal(r.data.total))
     }, [])
 
     const stats = [
         { label: 'Domains', value: domains.length, icon: Globe, href: '/admin/domains', color: 'text-blue-500' },
         { label: 'Courses', value: courses.length, icon: BookOpen, href: '/admin/courses', color: 'text-green-500' },
-        { label: 'Lessons', value: lessons.length, icon: FileText, href: '/admin/lessons', color: 'text-purple-500' },
+        { label: 'Lessons', value: lessonTotal, icon: FileText, href: '/admin/lessons', color: 'text-purple-500' },
     ]
 
     return (
