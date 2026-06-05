@@ -88,6 +88,30 @@ CATEGORY_TRANSLATIONS_VI: dict[str, dict] = {
         "title": "Mạng phân phối nội dung (CDN)",
         "description": "Phục vụ tài nguyên tĩnh và giảm latency toàn cầu với CDN.",
     },
+    "sql_vs_nosql_sd": {
+        "title": "SQL vs NoSQL",
+        "description": "Chọn loại database phù hợp cho từng use case.",
+    },
+    "rate_limiting_sd": {
+        "title": "Rate Limiting",
+        "description": "Bảo vệ API khỏi lạm dụng và đảm bảo sử dụng công bằng.",
+    },
+    "distributed_transactions_sd": {
+        "title": "Giao dịch Phân tán",
+        "description": "Duy trì nhất quán dữ liệu qua nhiều service và database.",
+    },
+    "event_driven_sd": {
+        "title": "Kiến trúc Hướng Sự kiện",
+        "description": "Xây dựng hệ thống phản ứng, loose coupling với các pattern hướng sự kiện.",
+    },
+    "websocket_sd": {
+        "title": "WebSockets & Thời gian thực",
+        "description": "Xây dựng tính năng real-time với WebSockets và Server-Sent Events.",
+    },
+    "monolith_vs_microservices_sd": {
+        "title": "Monolith vs Microservices",
+        "description": "Khi nào nên tách monolith và cách thực hiện an toàn.",
+    },
 }
 
 # ── English IT Lesson translations ────────────────────────────────────────────
@@ -1038,6 +1062,826 @@ Khi thảo luận về lựa chọn DB nào, hãy đề cập CAP. Cho thấy đ
                         "Ghi đơn thuốc y tế",
                     ],
                     "explanation": "Feed mạng xã hội có thể chấp nhận nội dung hơi cũ — tính sẵn sàng quan trọng hơn độ mới. Hệ thống tài chính và y tế cần strong consistency.",
+                },
+            ],
+        },
+    },
+    "microservices_sd": {
+        "lesson": {
+            "title": "Kiến trúc Microservices: Nguyên tắc và Pattern",
+            "content": """# Kiến trúc Microservices
+
+Microservices là phong cách kiến trúc xây dựng ứng dụng thành tập hợp các service nhỏ, độc lập, mỗi service sở hữu database riêng và giao tiếp qua mạng.
+
+## Monolith vs Microservices
+
+| Khía cạnh | Monolith | Microservices |
+|-----------|----------|---------------|
+| Triển khai | Một đơn vị | Độc lập mỗi service |
+| Scale | Scale toàn bộ | Chỉ scale bottleneck |
+| Cô lập lỗi | Một bug có thể crash tất cả | Lỗi được giới hạn |
+
+## Các Pattern Quan trọng
+
+### API Gateway
+Điểm vào duy nhất cho mọi request từ client. Xử lý auth, rate limiting, logging.
+
+### Circuit Breaker
+Nếu Service B liên tục lỗi, Service A ngừng gọi và trả fallback. Ngăn cascading failure.
+
+### Saga Pattern
+Quản lý distributed transaction. Mỗi bước publish event; compensating transaction hoàn tác khi lỗi.
+
+### Event-Driven Communication
+Services giao tiếp qua event (Kafka, SQS). Loose coupling, bất đồng bộ.
+
+## Khi Nào Dùng Microservices
+- Team lớn, nhiều người xung đột trên cùng module
+- Các phần cần scale rất khác nhau
+- Cần chu kỳ triển khai độc lập
+- Đã có CI/CD và monitoring trưởng thành
+
+## Khi Nào KHÔNG Nên Dùng
+- Đang xây dựng MVP
+- Team nhỏ (< 5 kỹ sư)
+- Ranh giới domain chưa rõ
+
+## Thực tế: Amazon
+Jeff Bezos bắt buộc tất cả team expose dữ liệu qua API. Amazon đã tách thành hàng nghìn microservices. Nút "checkout" gọi ~150 service.
+
+## Mẹo phỏng vấn
+Luôn đề cập: service boundary (DDD), communication (sync REST/gRPC vs async event), quản lý dữ liệu (mỗi service sở hữu DB riêng), và độ phức tạp vận hành.""",
+        },
+        "quiz": {
+            "title": "Quiz: Kiến trúc Microservices",
+            "description": "Kiểm tra hiểu biết về nguyên tắc và pattern microservices.",
+            "questions": [
+                {
+                    "question": "Pattern 'database per service' có nghĩa là gì?",
+                    "options": [
+                        "Tất cả microservices dùng chung một database trung tâm",
+                        "Mỗi microservice sở hữu và quản lý database riêng",
+                        "Database được replicate qua tất cả service",
+                        "Service dùng read replica của primary database",
+                    ],
+                    "explanation": "Mỗi microservice sở hữu database riêng, cho phép thay đổi schema độc lập, chọn công nghệ phù hợp và scale độc lập.",
+                },
+                {
+                    "question": "Circuit Breaker pattern giải quyết vấn đề gì?",
+                    "options": [
+                        "Service discovery trong môi trường động",
+                        "Nhất quán distributed transaction",
+                        "Ngăn cascading failure khi downstream service không khả dụng",
+                        "Cân bằng tải giữa các service instance",
+                    ],
+                    "explanation": "Circuit breaker phát hiện lỗi lặp đi lặp lại và 'mở' — ngừng gọi service lỗi và trả fallback response.",
+                },
+                {
+                    "question": "Khi nào KHÔNG nên dùng microservices?",
+                    "options": [
+                        "Khi team có 100+ kỹ sư",
+                        "Khi services cần scale độc lập",
+                        "Khi xây dựng MVP với team nhỏ",
+                        "Khi cần chu kỳ triển khai độc lập",
+                    ],
+                    "explanation": "Microservices thêm rất nhiều độ phức tạp vận hành. Với MVP hoặc team nhỏ, chi phí vượt quá lợi ích.",
+                },
+            ],
+        },
+    },
+    "database_scaling_sd": {
+        "lesson": {
+            "title": "Scale Database: Sharding, Replication và Partitioning",
+            "content": """# Scale Database
+
+Một instance PostgreSQL đơn lẻ tối đa khoảng 100.000 query/giây. Vượt ngưỡng đó, phải scale.
+
+## Read Replicas
+Primary xử lý ghi; nhiều replica xử lý đọc.
+- AWS: RDS Read Replicas, Aurora lên đến 15 replica
+- Trade-off: Replica có thể hơi chậm hơn (replication lag)
+
+## Sharding (Horizontal Partitioning)
+Chia dữ liệu qua nhiều server. Mỗi shard chứa một tập con.
+
+**Chiến lược:**
+- **Range-based**: A-M → Shard 1, N-Z → Shard 2. Đơn giản nhưng tạo hotspot.
+- **Hash-based**: `shard_id = hash(user_id) % num_shards`. Phân phối đều nhưng khó rebalance.
+- **Directory-based**: Lookup table ánh xạ record đến shard.
+
+**Thách thức:** Cross-shard query tốn kém, re-sharding phức tạp.
+
+## Vertical Partitioning
+Chia bảng thành nhiều bảng ít cột hơn. Hot path đọc từ bảng nhỏ hơn.
+
+## Connection Pooling
+Dùng PgBouncer hoặc HikariCP để tái sử dụng connection. Không có pooling: 10K user đồng thời = 10K DB connection mở → database crash.
+
+## Thực tế: Instagram
+Instagram shard dữ liệu user qua hàng nghìn PostgreSQL shard. `shard_id = user_id % num_shards`.
+
+## Mẹo phỏng vấn
+Đi qua các bước: 1) Tối ưu query + index, 2) Vertical scale, 3) Read replicas, 4) Caching (Redis), 5) Sharding là biện pháp cuối cùng.""",
+        },
+        "quiz": {
+            "title": "Quiz: Scale Database",
+            "description": "Kiểm tra kiến thức về kỹ thuật scale database.",
+            "questions": [
+                {
+                    "question": "Mục đích của read replica là gì?",
+                    "options": [
+                        "Shard dữ liệu qua nhiều server",
+                        "Cung cấp automatic failover",
+                        "Giảm tải read từ primary database",
+                        "Cache kết quả query",
+                    ],
+                    "explanation": "Read replica nhận bản sao toàn bộ dữ liệu từ primary. Query đọc đến replica, giảm tải cho primary.",
+                },
+                {
+                    "question": "Nhược điểm lớn của hash-based sharding là gì?",
+                    "options": [
+                        "Tạo hotspot với phân phối không đều",
+                        "Re-sharding khi thêm server đòi hỏi di chuyển lượng lớn dữ liệu",
+                        "Cần bảng lookup trung tâm",
+                        "Chỉ hoạt động với NoSQL",
+                    ],
+                    "explanation": "Khi thêm/bỏ shard, hash function thay đổi và hầu hết dữ liệu cần di chuyển. Consistent hashing giảm thiểu nhưng thêm độ phức tạp.",
+                },
+                {
+                    "question": "Connection pooler như PgBouncer giải quyết vấn đề gì?",
+                    "options": [
+                        "Replicate dữ liệu qua server",
+                        "Phân phối query tự động",
+                        "Tái sử dụng DB connection để giảm overhead",
+                        "Mã hóa connection",
+                    ],
+                    "explanation": "Connection pooler duy trì pool connection mở và tái sử dụng, cho phép hàng nghìn app thread dùng chung số lượng nhỏ hơn DB connection thực.",
+                },
+            ],
+        },
+    },
+    "message_queue_sd": {
+        "lesson": {
+            "title": "Message Queue: Giao tiếp Bất đồng bộ trong Hệ thống Phân tán",
+            "content": """# Message Queue
+
+Message queue cho phép **giao tiếp bất đồng bộ giữa các service**. Producer gửi message; consumer đọc và xử lý độc lập.
+
+## Khi Nào Dùng Queue
+- Traffic spike cao: queue làm buffer
+- Task lâu dài: không chặn HTTP response (email, resize ảnh)
+- Loose coupling: service không cần biết về nhau
+- Reliability: service consumer tắt, message vẫn chờ trong queue
+
+## Queue vs Pub/Sub
+- **Queue**: Mỗi message được consume bởi đúng một consumer (AWS SQS, RabbitMQ)
+- **Pub/Sub**: Mỗi message được gửi đến tất cả subscriber (AWS SNS, Kafka)
+
+## Apache Kafka
+Nền tảng distributed log/streaming. Khái niệm chính:
+- **Topic**: Danh mục message (persistent, replayable)
+- **Partition**: Topic chia thành partition để song song hóa
+- **Consumer Group**: Nhiều consumer chia sẻ công việc trên một topic
+- **Retention**: Message tồn tại theo thời gian cấu hình (mặc định 7 ngày)
+
+Throughput Kafka: hàng triệu message/giây. LinkedIn xử lý 7 nghìn tỷ message/ngày trên Kafka.
+
+## Thực tế: Uber
+Khi bạn đặt Uber, Kafka publish 'TripRequested'. Driver matching, payment, ETA, notification đều consume độc lập.
+
+## Mẹo phỏng vấn
+Với email, xử lý ảnh, payment, task lâu dài — đề xuất ngay message queue. Cho thấy bạn biết SQS (task queue) vs Kafka (event streaming).""",
+        },
+        "quiz": {
+            "title": "Quiz: Message Queue",
+            "description": "Kiểm tra hiểu biết về message queue và giao tiếp bất đồng bộ.",
+            "questions": [
+                {
+                    "question": "Sự khác biệt chính giữa queue và pub/sub là gì?",
+                    "options": [
+                        "Queue nhanh hơn; pub/sub tin cậy hơn",
+                        "Trong queue một consumer nhận mỗi message; trong pub/sub tất cả subscriber nhận",
+                        "Queue cho real-time; pub/sub cho batch",
+                        "Pub/sub yêu cầu acknowledgment; queue thì không",
+                    ],
+                    "explanation": "Queue phân phối message cho một consumer (phân công việc). Pub/sub broadcast mỗi message đến tất cả subscriber (thông báo sự kiện).",
+                },
+                {
+                    "question": "Khi nào message queue là lựa chọn thiết kế đúng?",
+                    "options": [
+                        "Khi consumer phải phản hồi trong 100ms",
+                        "Khi cần xử lý task async để không chặn user",
+                        "Khi service cần dùng chung database",
+                        "Khi cần latency thấp nhất",
+                    ],
+                    "explanation": "Message queue lý tưởng cho task async — gửi email, resize ảnh, xử lý payment. Ngăn HTTP request bị chặn bởi thao tác chậm.",
+                },
+                {
+                    "question": "Điều gì xảy ra với message khi consumer tạm thời tắt?",
+                    "options": [
+                        "Message bị xóa để ngăn tràn",
+                        "Gửi đến consumer dự phòng",
+                        "Giữ lại trong queue đến khi consumer phục hồi",
+                        "Producer tự động retry trực tiếp",
+                    ],
+                    "explanation": "Message tồn tại trong queue khi consumer offline. Khi phục hồi, consumer xử lý backlog. Không có message nào bị mất.",
+                },
+            ],
+        },
+    },
+    "api_gateway_sd": {
+        "lesson": {
+            "title": "API Gateway: Cửa Ngõ cho Microservices",
+            "content": """# API Gateway
+
+API Gateway là server đóng vai trò **điểm vào duy nhất** cho tất cả request từ client.
+
+## Trách nhiệm Chính
+- **Routing**: Điều hướng request đến microservice đúng
+- **Authentication & Authorization**: Xác thực JWT token hoặc API key
+- **Rate Limiting**: Ngăn lạm dụng
+- **SSL Termination**: Giải mã HTTPS tại gateway
+- **Request/Response Transformation**: Chuyển đổi giữa các format
+- **Logging & Monitoring**: Observability tập trung
+- **Caching**: Cache response phổ biến
+
+## Gateway vs Load Balancer
+
+| Khía cạnh | Load Balancer | API Gateway |
+|-----------|---------------|-------------|
+| Layer | L4 hoặc L7 | L7 luôn luôn |
+| Auth | Không | Có |
+| Rate Limiting | Không | Có |
+| Transformation | Không | Có |
+
+## Chiến lược Rate Limiting
+- **Token Bucket**: Cho phép burst. Mỗi user có N token, nạp lại theo tốc độ R.
+- **Leaky Bucket**: Xử lý theo tốc độ cố định. Làm phẳng burst.
+- **Fixed Window**: N request mỗi time window. Đơn giản nhưng có vấn đề ranh giới.
+- **Sliding Window**: Tốc độ mượt mà, không có spike ranh giới.
+
+## Thực tế: Netflix
+Gateway Zuul của Netflix xử lý toàn bộ API traffic — authentication, routing đến 100+ microservice, circuit breaking, A/B testing và canary deployment.
+
+## Mẹo phỏng vấn
+Vẽ API Gateway là thành phần đầu tiên client tương tác. Cross-cutting concern (auth, rate limiting, logging) được xử lý một lần tại gateway, không phải trong mỗi service.""",
+        },
+        "quiz": {
+            "title": "Quiz: API Gateway",
+            "description": "Kiểm tra kiến thức về pattern API Gateway.",
+            "questions": [
+                {
+                    "question": "Vai trò chính của API Gateway là gì?",
+                    "options": [
+                        "Lưu trữ dữ liệu dùng chung giữa microservices",
+                        "Đóng vai điểm vào duy nhất xử lý routing và cross-cutting concern",
+                        "Thay thế load balancer",
+                        "Quản lý database connection",
+                    ],
+                    "explanation": "API Gateway là điểm vào duy nhất cho toàn bộ traffic bên ngoài. Nó route request và xử lý auth, rate limiting, logging tập trung.",
+                },
+                {
+                    "question": "Chiến lược rate limiting nào cho phép burst traffic ngắn?",
+                    "options": ["Fixed Window", "Leaky Bucket", "Token Bucket", "Sliding Window"],
+                    "explanation": "Token bucket cho phép burst — nếu token đã tích lũy, user có thể thực hiện nhiều request nhanh đến khi bucket rỗng.",
+                },
+                {
+                    "question": "Tại sao API Gateway giảm sự trùng lặp trong microservices?",
+                    "options": [
+                        "Dùng chung database",
+                        "Cross-cutting concern như auth được implement một lần tại gateway",
+                        "Tự tạo client SDK",
+                        "Kết hợp nhiều service deployment",
+                    ],
+                    "explanation": "Không có gateway, mỗi microservice implement authentication, rate limiting và logging. Gateway tập trung những thứ này.",
+                },
+            ],
+        },
+    },
+    "cdn_sd": {
+        "lesson": {
+            "title": "Mạng Phân phối Nội dung (CDN): Hiệu suất Toàn cầu",
+            "content": """# Mạng Phân phối Nội dung (CDN)
+
+CDN là mạng server phân tán địa lý (Points of Presence/PoP) cache và phục vụ nội dung gần người dùng hơn.
+
+## CDN Hoạt Động Thế Nào
+1. User request `cdn.example.com/logo.png`
+2. DNS phân giải về PoP gần nhất
+3. **Cache hit**: PoP phục vụ ngay lập tức
+4. **Cache miss**: PoP lấy từ origin, cache lại, phục vụ user
+5. User tiếp theo tại cùng PoP được cache hit
+
+## CDN Cache Gì
+- Static asset: hình ảnh, CSS, JS, font, video
+- API response (với Cache-Control header phù hợp)
+- CDN KHÔNG cache: trang có auth, POST request, nội dung cá nhân hóa
+
+## Lợi Ích
+- Cải thiện latency 50-300ms cho user toàn cầu
+- 80-95% request được phục vụ từ cache
+- Bảo vệ DDoS
+- Giảm chi phí bandwidth origin
+
+## Cache Invalidation
+1. **URL versioning (tốt nhất)**: `main.a3f9b2.js` — nội dung mới = URL mới
+2. **CDN invalidation API**: Purge URL thủ công
+3. **TTL expiry**: Chờ TTL hết hạn. Stale cho đến đó.
+
+## Thực tế
+AWS CloudFront có 450+ PoP. Cloudflare tập trung bảo mật, có gói miễn phí.
+
+## Mẹo phỏng vấn
+Với bất kỳ hệ thống toàn cầu nào, đề cập CDN ngay. 'Chúng ta sẽ đặt CDN trước S3 cho static asset và trước API cho các response có thể cache — giảm latency và cắt tải origin ~90%.'""",
+        },
+        "quiz": {
+            "title": "Quiz: CDN",
+            "description": "Kiểm tra kiến thức về CDN và pattern sử dụng.",
+            "questions": [
+                {
+                    "question": "Điều gì xảy ra khi CDN cache miss?",
+                    "options": [
+                        "CDN trả 404",
+                        "CDN lấy từ origin, cache lại và phục vụ user",
+                        "CDN redirect user đến origin",
+                        "Request được xếp hàng",
+                    ],
+                    "explanation": "Khi cache miss, CDN PoP lấy từ origin, lưu vào cache cục bộ và phục vụ user. Request tiếp theo từ PoP đó là cache hit.",
+                },
+                {
+                    "question": "Chiến lược cache invalidation tốt nhất cho JS bundle là gì?",
+                    "options": [
+                        "TTL rất ngắn (60s)",
+                        "Dùng CDN invalidation API sau mỗi deploy",
+                        "Thêm content hash vào URL file",
+                        "Tắt cache cho JS",
+                    ],
+                    "explanation": "URL với content hash (main.a3f9b2.js) là tốt nhất — nội dung mới = URL mới = cache entry mới. Cho phép TTL rất dài với cập nhật tức thì.",
+                },
+                {
+                    "question": "CDN giảm tải cho origin server như thế nào?",
+                    "options": [
+                        "Nén request trước khi chuyển tiếp",
+                        "Batch nhiều request thành một",
+                        "Phục vụ nội dung cache từ PoP để hầu hết request không đến origin",
+                        "Chạy code ứng dụng tại edge",
+                    ],
+                    "explanation": "Với cache hit rate cao (80-95%), hầu hết request được phục vụ từ CDN PoP. Chỉ cache miss mới đến origin.",
+                },
+            ],
+        },
+    },
+    "sql_vs_nosql_sd": {
+        "lesson": {
+            "title": "SQL vs NoSQL: Chọn Database Phù hợp",
+            "content": """# SQL vs NoSQL
+
+## SQL (Quan hệ)
+Lưu dữ liệu trong bảng với schema cố định. Hỗ trợ ACID transaction.
+**Ví dụ**: PostgreSQL, MySQL, AWS RDS
+**Dùng khi**: Query phức tạp với JOIN, cần ACID, dữ liệu có cấu trúc, dữ liệu tài chính/y tế.
+
+## Các Loại NoSQL
+
+### Document Store (MongoDB, DynamoDB)
+Document dạng JSON. Schema linh hoạt theo từng document.
+**Dùng cho**: Profile user, danh mục sản phẩm, quản lý nội dung.
+
+### Key-Value (Redis, DynamoDB)
+Đơn giản: key → value. Cực kỳ nhanh.
+**Dùng cho**: Caching, session, leaderboard.
+
+### Column Family (Cassandra, HBase)
+Tối ưu cho write-heavy workload, time-series.
+**Dùng cho**: IoT, analytics, event log.
+
+### Graph (Neo4j, Amazon Neptune)
+Tối ưu cho dữ liệu kết nối chặt chẽ.
+**Dùng cho**: Mạng xã hội, gợi ý, phát hiện gian lận.
+
+## Khi Nào Chọn SQL
+- Cần JOIN và query phức tạp
+- Yêu cầu ACID transaction (thanh toán, đặt chỗ)
+- Scale < 10TB, < 100K write/giây
+
+## Khi Nào Chọn NoSQL
+- Scale khổng lồ (triệu write/giây)
+- Schema linh hoạt, đang phát triển
+- Pattern truy cập đơn giản (lookup theo key)
+
+## Thực tế: Netflix
+Netflix dùng MySQL (billing), Cassandra (lịch sử xem), Redis (cache), Elasticsearch (tìm kiếm).
+
+## Mẹo phỏng vấn
+Đừng nói 'tùy' mà không giải thích. Mặc định PostgreSQL. Chọn Cassandra cho write throughput cực lớn, MongoDB cho schema linh hoạt, DynamoDB cho serverless scale-to-zero.""",
+        },
+        "quiz": {
+            "title": "Quiz: SQL vs NoSQL",
+            "description": "Kiểm tra hiểu biết về trade-off giữa các loại database.",
+            "questions": [
+                {
+                    "question": "Ưu điểm chính của SQL so với hầu hết NoSQL là gì?",
+                    "options": [
+                        "Scale ngang dễ dàng hơn",
+                        "Hỗ trợ ACID transaction cho strong consistency",
+                        "Xử lý dữ liệu phi cấu trúc tốt hơn",
+                        "Latency thấp hơn cho key-value lookup",
+                    ],
+                    "explanation": "Database SQL được xây dựng xung quanh ACID transaction. Điều này làm chúng lý tưởng cho hệ thống tài chính, y tế và đặt chỗ.",
+                },
+                {
+                    "question": "Khi nào bạn chọn Cassandra thay vì PostgreSQL?",
+                    "options": [
+                        "Khi cần JOIN phức tạp",
+                        "Khi cần ACID transaction cho payment",
+                        "Khi cần hàng triệu write mỗi giây",
+                        "Khi dữ liệu có schema cố định",
+                    ],
+                    "explanation": "Cassandra được thiết kế cho write throughput khổng lồ và scalability ngang tuyến tính, đánh đổi ACID và JOIN.",
+                },
+                {
+                    "question": "Với ứng dụng fintech mới yêu cầu giao dịch tài chính, database tốt nhất là gì?",
+                    "options": [
+                        "MongoDB, vì linh hoạt",
+                        "Cassandra, cho write throughput cao",
+                        "Redis, vì nhanh",
+                        "PostgreSQL, cho ACID transaction và strong consistency",
+                    ],
+                    "explanation": "Giao dịch tài chính yêu cầu đảm bảo ACID. PostgreSQL là mặc định công nghiệp cho dữ liệu tài chính với strong consistency và tooling trưởng thành.",
+                },
+            ],
+        },
+    },
+    "rate_limiting_sd": {
+        "lesson": {
+            "title": "Rate Limiting: Bảo vệ API khỏi Lạm dụng",
+            "content": """# Rate Limiting
+
+Rate limiting kiểm soát **số request một client có thể thực hiện** trong khoảng thời gian nhất định.
+
+## Tại Sao Cần Rate Limit
+- Bảo vệ DDoS
+- Đảm bảo sử dụng công bằng
+- Kiểm soát chi phí
+- Mô hình kinh doanh (gói miễn phí vs trả phí)
+- Bảo vệ downstream
+
+## Thuật Toán
+
+### Fixed Window Counter
+Đếm request theo time window (100 req/phút).
+**Vấn đề**: Client có thể thực hiện 100 lúc 11:59 và 100 lúc 12:00 — 200 trong 2 giây.
+
+### Token Bucket
+Client có N token; mỗi request tốn 1 token; token nạp lại theo tốc độ R. Cho phép burst.
+Twitter dùng cho API rate limiting.
+
+### Leaky Bucket
+Request xử lý theo tốc độ cố định. Làm phẳng burst. Tốt cho xử lý payment.
+
+### Sliding Window
+Xấp xỉ sliding window dùng fixed counter có trọng số. Chính xác không cần log đầy đủ.
+
+## Triển Khai
+**API Gateway ưu tiên** — tập trung, ngăn traffic trước khi đến service.
+
+**Redis-based distributed**: Tất cả gateway instance dùng chung counter trong Redis.
+
+## HTTP Response
+```
+HTTP 429 Too Many Requests
+Retry-After: 30
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 0
+```
+
+## Thực tế: GitHub API
+5.000 request/giờ cho user đã xác thực, 60 cho ẩn danh. Trả X-RateLimit-* header trong mỗi response.
+
+## Mẹo phỏng vấn
+Đề cập: 1) Thuật toán (token bucket — cho phép burst), 2) Nơi đặt (API Gateway + Redis), 3) Giao tiếp với client (429 + Retry-After). Đặt giới hạn khác nhau theo user tier và endpoint.""",
+        },
+        "quiz": {
+            "title": "Quiz: Rate Limiting",
+            "description": "Kiểm tra kiến thức về thuật toán và triển khai rate limiting.",
+            "questions": [
+                {
+                    "question": "HTTP status code nào request bị rate limit nhận?",
+                    "options": ["400 Bad Request", "401 Unauthorized", "429 Too Many Requests", "503 Service Unavailable"],
+                    "explanation": "HTTP 429 Too Many Requests là status code chuẩn cho rate limiting. Thêm Retry-After và X-RateLimit header.",
+                },
+                {
+                    "question": "Tại sao dùng Redis cho distributed rate limiting?",
+                    "options": [
+                        "Redis cung cấp ACID mạnh cho counter",
+                        "Tất cả API gateway instance có thể dùng chung counter trong Redis",
+                        "Redis tự động implement token bucket",
+                        "Redis rate limiting được tích hợp vào AWS API Gateway",
+                    ],
+                    "explanation": "Khi nhiều API gateway instance xử lý traffic, chúng cần dùng chung số request đếm cho mỗi user. Redis cung cấp atomic counter dùng chung.",
+                },
+                {
+                    "question": "Nên triển khai rate limiting ở đâu trong microservices?",
+                    "options": [
+                        "Trong mỗi service độc lập",
+                        "Ở tầng database",
+                        "Tại API Gateway, tập trung",
+                        "Trong ứng dụng client",
+                    ],
+                    "explanation": "Triển khai tại API Gateway tập trung logic — tránh trùng lặp trong mỗi service. Traffic lạm dụng bị chặn trước khi đến microservice.",
+                },
+            ],
+        },
+    },
+    "distributed_transactions_sd": {
+        "lesson": {
+            "title": "Giao dịch Phân tán: Đảm bảo Nhất quán giữa các Service",
+            "content": """# Giao dịch Phân tán
+
+Trong microservices, mỗi service có database riêng. Làm thế nào để đảm bảo thao tác trải qua nhiều service là atomic?
+
+## Two-Phase Commit (2PC)
+Coordinator yêu cầu tất cả participant 'prepare' (lock resource). Nếu tất cả đồng ý → commit. Nếu bất kỳ từ chối → abort.
+
+**Vấn đề**: Chậm (hai vòng RTT), blocking (nếu coordinator crash, participant giữ lock), khả dụng kém. **Hiếm khi dùng trong hệ thống hiện đại.**
+
+## Saga Pattern
+Chia transaction thành các local transaction. Mỗi bước publish event. Khi lỗi, **compensating transaction** hoàn tác bước trước.
+
+### Choreography Saga
+Service phản ứng với event độc lập — không có coordinator trung tâm.
+
+### Orchestration Saga
+Orchestrator trung tâm điều phối từng bước tường minh.
+
+## Outbox Pattern
+Vấn đề: Làm thế nào ghi vào DB VÀ publish event atomically?
+
+Giải pháp: Ghi event vào **outbox table** trong cùng DB transaction. Process riêng đọc và publish.
+
+## Idempotency
+Retry không được gây effect trùng lặp. Thêm **idempotency key** với mỗi thao tác. Nếu thấy lần hai, trả kết quả trước mà không thực thi lại.
+
+## Thực tế: Uber Eats
+Saga: Reserve công suất nhà hàng → Charge payment → Thông báo tài xế. Khi lỗi, compensating transaction chạy. Choreography qua Kafka event.
+
+## Mẹo phỏng vấn
+'Tôi tránh 2PC vì tính blocking. Tôi dùng Saga pattern cho business transaction và Outbox pattern cho event publishing tin cậy. Tôi thiết kế thao tác idempotent để retry an toàn.'""",
+        },
+        "quiz": {
+            "title": "Quiz: Giao dịch Phân tán",
+            "description": "Kiểm tra hiểu biết về pattern giao dịch phân tán.",
+            "questions": [
+                {
+                    "question": "Vấn đề chính của 2PC trong hệ thống phân tán là gì?",
+                    "options": [
+                        "Yêu cầu cùng database cho mỗi service",
+                        "Blocking — nếu coordinator crash, participant giữ lock vô thời hạn",
+                        "Không thể xử lý hơn hai service",
+                        "Không hỗ trợ rollback",
+                    ],
+                    "explanation": "2PC là blocking. Sau khi vote 'yes', participant giữ resource lock và chờ coordinator. Nếu coordinator crash, chúng bị kẹt.",
+                },
+                {
+                    "question": "Outbox Pattern giải quyết vấn đề gì?",
+                    "options": [
+                        "Cross-service JOIN",
+                        "Ghi vào DB VÀ publish event atomically",
+                        "Phối hợp distributed transaction không cần coordinator",
+                        "Replay event thất bại",
+                    ],
+                    "explanation": "Outbox pattern giải quyết vấn đề dual-write. Ghi event vào outbox table trong cùng DB transaction đảm bảo cả hai xảy ra cùng nhau.",
+                },
+                {
+                    "question": "'Idempotency' có nghĩa là gì?",
+                    "options": [
+                        "Thao tác hoàn thành trong thời gian đảm bảo",
+                        "Thực hiện cùng thao tác nhiều lần tạo ra kết quả giống như thực hiện một lần",
+                        "Thao tác phân phối đều giữa các instance",
+                        "Mỗi service duy trì transaction log riêng",
+                    ],
+                    "explanation": "Idempotency nghĩa là có thể retry thao tác an toàn. Nếu 'charge customer $50' bị retry, nó kiểm tra đã charge chưa (qua idempotency key) và không charge lại.",
+                },
+            ],
+        },
+    },
+    "event_driven_sd": {
+        "lesson": {
+            "title": "Kiến trúc Hướng Sự kiện: Xây dựng Hệ thống Phản ứng",
+            "content": """# Kiến trúc Hướng Sự kiện (EDA)
+
+Trong EDA, các thành phần giao tiếp bằng cách **produce và consume event** thay vì gọi trực tiếp nhau. Event là bản ghi bất biến về điều gì đó đã xảy ra: `OrderPlaced`, `UserRegistered`.
+
+## Lợi Ích
+- **Loose coupling**: Service không biết về nhau — chỉ biết về event schema
+- **Scalability**: Thêm consumer mà không sửa producer
+- **Resilience**: Event tích lũy nếu consumer tắt
+- **Auditability**: Event log là lịch sử đầy đủ
+- **Time travel**: Replay event để rebuild state
+
+## Các Pattern
+
+### Event Sourcing
+Lưu trạng thái dưới dạng chuỗi event. Để lấy trạng thái hiện tại, replay tất cả event.
+
+### CQRS (Command Query Responsibility Segregation)
+Tách write model (command) khỏi read model (query). Event từ write side cập nhật read side async.
+
+## Khi Nào Dùng EDA
+- Nhiều service phản ứng với cùng event
+- Service cần triển khai độc lập
+- Cần audit trail
+- Xử lý async throughput cao
+
+## Khi Nào Tránh
+- Cần phản hồi đồng bộ (user đang chờ)
+- Request/response đơn giản là đủ
+
+## Thực tế: Netflix
+Khi bạn xem phim, `PlaybackStarted` kích hoạt: cập nhật lịch sử, model gợi ý, đếm lượt xem, billing, analytics — tất cả độc lập.
+
+## Mẹo phỏng vấn
+Đề xuất EDA khi 'nhiều service cần phản ứng với hành động user' hoặc 'cần audit log'. Thể hiện bạn hiểu trade-off: debugging khó hơn (cần distributed tracing) nhưng resilience và scalability cải thiện.""",
+        },
+        "quiz": {
+            "title": "Quiz: Kiến trúc Hướng Sự kiện",
+            "description": "Kiểm tra hiểu biết về pattern kiến trúc hướng sự kiện.",
+            "questions": [
+                {
+                    "question": "Lợi ích chính của loose coupling trong EDA là gì?",
+                    "options": [
+                        "Service giao tiếp nhanh hơn với binary protocol",
+                        "Service không biết về nhau — chỉ biết về event schema",
+                        "Event loại bỏ API versioning",
+                        "Consumer có thể gọi đồng bộ nhau",
+                    ],
+                    "explanation": "Trong EDA, producer publish event mà không biết ai consume. Service mới có thể được thêm mà không sửa service hiện có — loose coupling thực sự.",
+                },
+                {
+                    "question": "Event Sourcing là gì?",
+                    "options": [
+                        "Lưu source code cho event handler",
+                        "Lấy event từ external webhook",
+                        "Lưu trạng thái dưới dạng chuỗi event bất biến và suy ra trạng thái hiện tại bằng cách replay",
+                        "Cache event response để replay nhanh hơn",
+                    ],
+                    "explanation": "Event Sourcing không bao giờ ghi đè trạng thái — nó append event. Trạng thái hiện tại được tính bằng cách replay tất cả event, cung cấp lịch sử đầy đủ và time travel.",
+                },
+                {
+                    "question": "Khi nào nên tránh kiến trúc hướng sự kiện?",
+                    "options": [
+                        "Nhiều service phản ứng với cùng hành động user",
+                        "Cần phản hồi đồng bộ (user đang chờ kết quả)",
+                        "Cần audit trail đầy đủ",
+                        "Service cần triển khai độc lập",
+                    ],
+                    "explanation": "EDA là bất đồng bộ theo bản chất. Nếu user submit payment và cần xác nhận ngay, bạn không thể chờ event lan truyền.",
+                },
+            ],
+        },
+    },
+    "websocket_sd": {
+        "lesson": {
+            "title": "WebSockets & Thời gian thực: Giao tiếp Hai chiều",
+            "content": """# WebSockets & Giao tiếp Thời gian thực
+
+HTTP truyền thống là request-response. Với tính năng real-time, bạn cần **server push dữ liệu đến client** mà không cần hỏi.
+
+## Các Lựa Chọn
+
+### WebSocket
+Kết nối TCP hai chiều, persistent. Cả hai bên gửi bất kỳ lúc nào. Thiết lập qua HTTP upgrade.
+**Dùng cho**: Chat, game multiplayer, collaboration trực tiếp, dashboard giao dịch.
+
+### Server-Sent Events (SSE)
+Một chiều: chỉ server push đến client. HTTP chuẩn. Tự kết nối lại.
+**Dùng cho**: Feed tin tức trực tiếp, thông báo, cập nhật tiến độ.
+
+### Long Polling
+Client request; server giữ đến khi có dữ liệu. Overhead cao. Chỉ dùng làm fallback.
+
+## Scale WebSocket
+**Thách thức**: WebSocket stateful — gắn với một server cụ thể. User A trên Server 1 không thể đến User B trên Server 2.
+
+**Giải pháp: Redis Pub/Sub**
+1. Server 1 nhận message từ A
+2. Server 1 publish lên Redis channel `chat:room:42`
+3. Server 2 (subscribe channel đó) nhận
+4. Server 2 push đến connection của B
+
+## Thực tế: Slack
+Slack dùng WebSocket cho messaging real-time. Message qua HTTP POST đến API, publish lên Redis Pub/Sub channel của workspace, rồi push đến tất cả client đang kết nối.
+
+## Mẹo phỏng vấn
+Khi 'real-time' được đề cập, đề xuất WebSocket + Redis Pub/Sub. Phân biệt: WebSocket (bidirectional), SSE (unidirectional feed), Long polling (fallback). Thể hiện bạn hiểu thách thức scale ngang.""",
+        },
+        "quiz": {
+            "title": "Quiz: WebSockets & Real-time",
+            "description": "Kiểm tra hiểu biết về pattern giao tiếp thời gian thực.",
+            "questions": [
+                {
+                    "question": "Sự khác biệt chính giữa WebSocket và SSE là gì?",
+                    "options": [
+                        "WebSocket dùng HTTP; SSE dùng TCP",
+                        "WebSocket hai chiều; SSE chỉ từ server đến client",
+                        "SSE hỗ trợ binary; WebSocket chỉ text",
+                        "WebSocket yêu cầu server chuyên dụng",
+                    ],
+                    "explanation": "WebSocket full-duplex — cả hai bên gửi message. SSE một chiều — chỉ server push. Dùng WebSocket cho chat, SSE cho notification feed.",
+                },
+                {
+                    "question": "Redis Pub/Sub giải quyết vấn đề scale WebSocket như thế nào?",
+                    "options": [
+                        "Redis lưu connection state để bất kỳ server nào có thể tiếp tục",
+                        "Tất cả WebSocket server subscribe Redis channel và fan out message đến client đang kết nối",
+                        "Redis route connection đến server đúng",
+                        "Redis đóng vai trò load balancer cho WebSocket traffic",
+                    ],
+                    "explanation": "Khi Server 1 nhận message, nó publish lên Redis channel. Tất cả WebSocket server subscribe channel đó push message đến user đang kết nối.",
+                },
+                {
+                    "question": "Khi nào bạn ưu tiên SSE hơn WebSocket?",
+                    "options": [
+                        "Cho game multiplayer",
+                        "Cho ứng dụng chat trực tiếp",
+                        "Cho feed tin tức trực tiếp khi chỉ server gửi dữ liệu",
+                        "Cho document editor cộng tác",
+                    ],
+                    "explanation": "SSE đơn giản hơn khi chỉ cần luồng dữ liệu từ server đến client. HTTP chuẩn, tự kết nối lại, dễ scale hơn. Không cần WebSocket nếu client không gửi dữ liệu.",
+                },
+            ],
+        },
+    },
+    "monolith_vs_microservices_sd": {
+        "lesson": {
+            "title": "Monolith vs Microservices: Đưa ra Quyết định Đúng",
+            "content": """# Monolith vs Microservices
+
+## Monolith
+Một đơn vị triển khai duy nhất. Cách Amazon, Netflix, Airbnb, Shopify bắt đầu.
+
+**Ưu điểm**: Phát triển đơn giản, debug dễ, không có network overhead, deploy/rollback đơn giản.
+
+**Nhược điểm**: Phải deploy toàn bộ để thay một dòng, không scale được từng component, bị khóa công nghệ.
+
+## Thực tế Microservices
+Độ phức tạp thêm: network failure, cần distributed tracing, nhiều CI/CD pipeline, service discovery, distributed transaction.
+
+**Conway's Law**: Tổ chức thiết kế hệ thống phản chiếu cấu trúc giao tiếp của họ. Microservices phù hợp khi có team độc lập.
+
+## Migration: Strangler Fig Pattern
+Đừng viết lại monolith. Trích xuất service dần dần:
+1. Xác định bounded context với ranh giới rõ
+2. Trích xuất thành service với DB riêng
+3. Route traffic đến service mới qua API Gateway
+4. Xóa code khỏi monolith
+5. Lặp lại
+
+## Khi Nào Trích Xuất Service
+- Module cần scale rất khác phần còn lại
+- Nhiều team xung đột trên cùng module
+- Muốn công nghệ khác cho component cụ thể
+- Module có dữ liệu độc lập (không có cross-boundary JOIN)
+
+## Thực tế: Amazon
+Bắt đầu như monolith năm 1995. Jeff Bezos ban hành 'API Mandate' năm 2001. Hơn một thập kỷ sau, tách thành hàng nghìn microservice.
+
+## Mẹo phỏng vấn
+Đừng bao giờ nói 'microservices luôn tốt hơn.' Thể hiện sự tinh tế: 'Tôi bắt đầu với modular monolith. Khi team lớn lên hoặc xuất hiện nhu cầu scale cụ thể, tôi trích xuất service bằng Strangler Fig pattern. Microservices đến sau khi đạt product-market fit, không phải trước.'""",
+        },
+        "quiz": {
+            "title": "Quiz: Monolith vs Microservices",
+            "description": "Kiểm tra hiểu biết về trade-off quyết định kiến trúc.",
+            "questions": [
+                {
+                    "question": "Strangler Fig pattern là gì?",
+                    "options": [
+                        "Loại bỏ microservice không dùng",
+                        "Dần dần thay thế monolith bằng cách xây service mới xung quanh nó",
+                        "Pattern cân bằng tải",
+                        "Pattern migration database",
+                    ],
+                    "explanation": "Strangler Fig xây microservice xung quanh monolith và dần dần route traffic sang. Monolith thu nhỏ dần — tránh rủi ro rewrite toàn bộ.",
+                },
+                {
+                    "question": "Conway's Law nói gì?",
+                    "options": [
+                        "Hệ thống phát triển lấp đầy tài nguyên sẵn có",
+                        "Tổ chức thiết kế hệ thống phản chiếu cấu trúc giao tiếp của họ",
+                        "Microservices phải có một trách nhiệm mỗi service",
+                        "Hệ thống phân tán luôn có điểm lỗi",
+                    ],
+                    "explanation": "Conway's Law: tổ chức bị ràng buộc tạo ra thiết kế phản chiếu cấu trúc giao tiếp. Microservices phù hợp khi team được tổ chức theo ranh giới service.",
+                },
+                {
+                    "question": "Khi nào trích xuất microservice rõ ràng là justified?",
+                    "options": [
+                        "Khi team đạt 5 developer",
+                        "Khi module cần scale rất khác phần còn lại",
+                        "Khi code vượt 10.000 dòng",
+                        "Khi app hơn 2 năm tuổi",
+                    ],
+                    "explanation": "Nếu module xử lý ảnh cần CPU gấp 50x phần còn lại, trích xuất thành service và scale độc lập. Đây là driver kỹ thuật thực sự.",
                 },
             ],
         },

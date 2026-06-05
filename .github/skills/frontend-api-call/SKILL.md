@@ -57,7 +57,7 @@ export const tagsApi = {
 'use client'
 import { useEffect, useState } from 'react'
 import { tagsApi } from '@/services/learnApi'
-import { useLang } from '@/hooks/useLang'
+import { useLang } from '@/contexts/LangContext'
 
 export function TagList() {
     const { lang } = useLang()
@@ -102,7 +102,7 @@ while (true) {
 Lấy lang từ context, truyền vào API:
 
 ```typescript
-import { useLang } from '@/hooks/useLang'
+import { useLang } from '@/contexts/LangContext'
 
 const { lang } = useLang()
 domainsApi.getAll(lang)  // truyền lang vào mọi API hỗ trợ i18n

@@ -16,6 +16,7 @@ import {
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { toast } from 'sonner'
 import { LanguageToggle } from '@/components/LanguageToggle'
+import { ThemeToggle } from '@/components/ThemeToggle'
 
 export function Navbar() {
     const { user, logout } = useAuth()
@@ -58,6 +59,7 @@ export function Navbar() {
                 </nav>
 
                 <div className="flex items-center gap-2">
+                    <ThemeToggle />
                     <LanguageToggle />
                     {user && (
                         <DropdownMenu>

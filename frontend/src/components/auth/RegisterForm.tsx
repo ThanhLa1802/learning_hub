@@ -1,10 +1,12 @@
 'use client'
 
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
+import { Eye, EyeOff } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -26,6 +28,8 @@ type FormData = z.infer<typeof schema>
 export function RegisterForm() {
     const { register: registerUser } = useAuth()
     const router = useRouter()
+    const [showPassword, setShowPassword] = useState(false)
+    const [showConfirm, setShowConfirm] = useState(false)
     const {
         register,
         handleSubmit,
@@ -61,12 +65,46 @@ export function RegisterForm() {
                     </div>
                     <div className="space-y-1.5">
                         <Label htmlFor="password">Password</Label>
-                        <Input id="password" type="password" placeholder="Min. 8 characters" {...register('password')} />
+                        <div className="relative">
+                            <Input
+                                id="password"
+                                type={showPassword ? 'text' : 'password'}
+                                placeholder="Min. 8 characters"
+                                className="pr-9"
+                                {...register('password')}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword((v) => !v)}
+                                className="absolute inset-y-0 right-0 flex items-center px-2.5 text-muted-foreground hover:text-foreground transition-colors"
+                                tabIndex={-1}
+                                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                            >
+                                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </button>
+                        </div>
                         {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
                     </div>
                     <div className="space-y-1.5">
                         <Label htmlFor="confirmPassword">Confirm password</Label>
-                        <Input id="confirmPassword" type="password" placeholder="••••••••" {...register('confirmPassword')} />
+                        <div className="relative">
+                            <Input
+                                id="confirmPassword"
+                                type={showConfirm ? 'text' : 'password'}
+                                placeholder="••••••••"
+                                className="pr-9"
+                                {...register('confirmPassword')}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowConfirm((v) => !v)}
+                                className="absolute inset-y-0 right-0 flex items-center px-2.5 text-muted-foreground hover:text-foreground transition-colors"
+                                tabIndex={-1}
+                                aria-label={showConfirm ? 'Hide password' : 'Show password'}
+                            >
+                                {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </button>
+                        </div>
                         {errors.confirmPassword && <p className="text-xs text-destructive">{errors.confirmPassword.message}</p>}
                     </div>
                     <Button type="submit" className="w-full" disabled={isSubmitting}>

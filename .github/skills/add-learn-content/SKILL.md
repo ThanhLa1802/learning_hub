@@ -63,7 +63,7 @@ TOPICS = [
 Lesson content viết bằng Markdown.
 Code blocks dùng triple backtick với language.
 """,
-            "content_type": LessonContentType.article,  # article | video | interactive
+            "content_type": LessonContentType.explanation,  # theory | explanation | case_study
             "estimated_minutes": 10,
             "order_index": 1,
         },
