@@ -1206,6 +1206,8 @@ def seed_translations(session: Session) -> None:
         COURSE_TRANSLATIONS_VI,
         DOMAIN_TRANSLATIONS_VI,
         ENGLISH_IT_LESSON_TRANSLATIONS_VI,
+        GO_LESSON_TRANSLATIONS_VI,
+        NODEJS_LESSON_TRANSLATIONS_VI,
         SD_LESSON_TRANSLATIONS_VI,
     )
     from app.models.lesson import Lesson as LessonModel
@@ -1236,6 +1238,66 @@ def seed_translations(session: Session) -> None:
     # ── English IT Lessons + Quizzes ──────────────────────────────────────────
     for category_name, data in ENGLISH_IT_LESSON_TRANSLATIONS_VI.items():
         cat = session.exec(select(ScenarioCategory).where(ScenarioCategory.name == category_name)).first()
+        if not cat:
+            continue
+        lesson = session.exec(
+            select(LessonModel).where(LessonModel.category_id == cat.id)
+        ).first()
+        if lesson:
+            lesson_vi = data.get("lesson", {})
+            lesson.translations = {"vi": {"title": lesson_vi.get("title", ""), "content": lesson_vi.get("content", "")}}
+            session.add(lesson)
+
+            quiz = session.exec(select(Quiz).where(Quiz.lesson_id == lesson.id)).first()
+            if quiz:
+                quiz_vi = data.get("quiz", {})
+                quiz.translations = {"vi": {"title": quiz_vi.get("title", ""), "description": quiz_vi.get("description", "")}}
+                session.add(quiz)
+                questions = session.exec(select(QuizQuestion).where(QuizQuestion.quiz_id == quiz.id).order_by(QuizQuestion.order_index)).all()
+                q_translations = quiz_vi.get("questions", [])
+                for i, q in enumerate(questions):
+                    if i < len(q_translations):
+                        qt = q_translations[i]
+                        q.translations = {"vi": {
+                            "question": qt.get("question", ""),
+                            "options": qt.get("options", q.options),
+                            "explanation": qt.get("explanation", ""),
+                        }}
+                        session.add(q)
+
+    # ── Go Lessons + Quizzes ──────────────────────────────────────────────────
+    for topic_name, data in GO_LESSON_TRANSLATIONS_VI.items():
+        cat = session.exec(select(ScenarioCategory).where(ScenarioCategory.name == topic_name)).first()
+        if not cat:
+            continue
+        lesson = session.exec(
+            select(LessonModel).where(LessonModel.category_id == cat.id)
+        ).first()
+        if lesson:
+            lesson_vi = data.get("lesson", {})
+            lesson.translations = {"vi": {"title": lesson_vi.get("title", ""), "content": lesson_vi.get("content", "")}}
+            session.add(lesson)
+
+            quiz = session.exec(select(Quiz).where(Quiz.lesson_id == lesson.id)).first()
+            if quiz:
+                quiz_vi = data.get("quiz", {})
+                quiz.translations = {"vi": {"title": quiz_vi.get("title", ""), "description": quiz_vi.get("description", "")}}
+                session.add(quiz)
+                questions = session.exec(select(QuizQuestion).where(QuizQuestion.quiz_id == quiz.id).order_by(QuizQuestion.order_index)).all()
+                q_translations = quiz_vi.get("questions", [])
+                for i, q in enumerate(questions):
+                    if i < len(q_translations):
+                        qt = q_translations[i]
+                        q.translations = {"vi": {
+                            "question": qt.get("question", ""),
+                            "options": qt.get("options", q.options),
+                            "explanation": qt.get("explanation", ""),
+                        }}
+                        session.add(q)
+
+    # ── Node.js Lessons + Quizzes ──────────────────────────────────────────────
+    for topic_name, data in NODEJS_LESSON_TRANSLATIONS_VI.items():
+        cat = session.exec(select(ScenarioCategory).where(ScenarioCategory.name == topic_name)).first()
         if not cat:
             continue
         lesson = session.exec(
@@ -1300,6 +1362,7 @@ def seed_translations(session: Session) -> None:
 def seed_database(session: Session) -> None:
     from app.db.seed_react import seed_react
     from app.db.seed_go import seed_go
+    from app.db.seed_nodejs import seed_nodejs
     from app.db.seed_llm import seed_llm
 
     seed_english_content(session)
@@ -1309,5 +1372,6 @@ def seed_database(session: Session) -> None:
     seed_system_design(session, course_map)
     seed_react(session)
     seed_go(session)
+    seed_nodejs(session)
     seed_llm(session)
     seed_translations(session)

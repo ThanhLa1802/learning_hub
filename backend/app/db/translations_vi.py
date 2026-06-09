@@ -13,6 +13,14 @@ DOMAIN_TRANSLATIONS_VI: dict[str, dict] = {
         "name": "Thiết kế Hệ thống",
         "description": "Học cách thiết kế hệ thống phân tán có khả năng mở rộng và đáng tin cậy. Cần thiết cho phỏng vấn senior và quyết định kiến trúc thực tế.",
     },
+    "node-js": {
+        "name": "Lập trình Node.js",
+        "description": "Thành thạo JavaScript phía server với Node.js — event loop, async patterns, Express.js, file system, streams và xây dựng REST API production-ready.",
+    },
+    "go-programming": {
+        "name": "Lập trình Go",
+        "description": "Học Go (Golang) từ cơ bản — cú pháp, concurrency với goroutines, error handling, interfaces và xây dựng backend services thực tế.",
+    },
 }
 
 COURSE_TRANSLATIONS_VI: dict[str, dict] = {
@@ -23,6 +31,14 @@ COURSE_TRANSLATIONS_VI: dict[str, dict] = {
     "system-design-fundamentals": {
         "name": "Nền tảng Thiết kế Hệ thống",
         "description": "Nắm vững các khái niệm cốt lõi của hệ thống phân tán có khả năng mở rộng.",
+    },
+    "node-js-fundamentals": {
+        "name": "Nền tảng Node.js",
+        "description": "Các khái niệm Node.js cốt lõi mà mọi lập trình viên backend cần biết — từ event loop đến xây dựng REST API với Express.",
+    },
+    "go-programming-fundamentals": {
+        "name": "Nền tảng Lập trình Go",
+        "description": "Các khái niệm Go cốt lõi mà mọi lập trình viên backend cần biết — từ cú pháp cơ bản đến các pattern concurrency.",
     },
 }
 
@@ -111,6 +127,48 @@ CATEGORY_TRANSLATIONS_VI: dict[str, dict] = {
     "monolith_vs_microservices_sd": {
         "title": "Monolith vs Microservices",
         "description": "Khi nào nên tách monolith và cách thực hiện an toàn.",
+    },
+    # Node.js categories
+    "nodejs_event_loop": {
+        "title": "Event Loop & Runtime",
+        "description": "Hiểu cách Node.js hoạt động bên trong — event loop, microtasks, libuv thread pool và tại sao Node.js mạnh với I/O-heavy workloads.",
+    },
+    "nodejs_modules": {
+        "title": "Modules & npm",
+        "description": "Nắm vững CommonJS vs ES modules, package.json, semantic versioning và các best practice với npm.",
+    },
+    "nodejs_filesystem": {
+        "title": "File System & Streams",
+        "description": "Đọc, ghi và stream file hiệu quả. Nắm vững fs, path và Node.js streams để xử lý dữ liệu lớn.",
+    },
+    "nodejs_express": {
+        "title": "Express.js Cơ bản",
+        "description": "Xây dựng REST API với Express.js — routing, middleware, error handling và best practices cho production.",
+    },
+    "nodejs_async": {
+        "title": "Các Pattern Bất đồng bộ",
+        "description": "Nắm vững async/await, Promise patterns, xử lý lỗi trong async code và tránh các lỗi phổ biến như callback hell.",
+    },
+    # Go categories
+    "go_basics": {
+        "title": "Go Cơ bản & Cú pháp",
+        "description": "Học Go packages, biến, kiểu dữ liệu, hàm và control flow — nền tảng của mọi chương trình Go.",
+    },
+    "go_slices_maps": {
+        "title": "Slices & Maps",
+        "description": "Nắm vững hai cấu trúc dữ liệu quan trọng nhất của Go — slices động và hash maps — với các pattern thực tế.",
+    },
+    "go_structs_interfaces": {
+        "title": "Structs & Interfaces",
+        "description": "Hiểu cách tiếp cận của Go với kiểu dữ liệu — structs cho dữ liệu, interfaces cho hành vi và embedding cho composition.",
+    },
+    "go_error_handling": {
+        "title": "Xử lý Lỗi",
+        "description": "Nắm vững pattern xử lý lỗi tường minh của Go — không exceptions, chỉ values. Tìm hiểu custom errors, wrapping và panic/recover.",
+    },
+    "go_concurrency": {
+        "title": "Goroutines & Channels",
+        "description": "Mở khóa tính năng mạnh nhất của Go — goroutines nhẹ và channels cho lập trình concurrent an toàn.",
     },
 }
 
@@ -806,6 +864,2027 @@ Code review là nơi kỹ năng kỹ thuật gặp gỡ giao tiếp chuyên nghi
 }
 
 # ── System Design Lesson translations ─────────────────────────────────────────
+
+NODEJS_LESSON_TRANSLATIONS_VI: dict[str, dict] = {
+    "nodejs_event_loop": {
+        "lesson": {
+            "title": "Node.js Event Loop: Cách Nó Thực sự Hoạt động",
+            "content": """# Node.js Event Loop & Runtime
+
+Node.js **đơn luồng** nhưng đạt được concurrency cao nhờ kiến trúc **event-driven, non-blocking I/O**.
+
+## V8 Engine + libuv
+
+Node.js = **V8** (JavaScript engine) + **libuv** (thư viện async I/O đa nền tảng).
+
+- V8 biên dịch và thực thi JS trên một luồng duy nhất ("main thread")
+- libuv cung cấp event loop, thread pool và async I/O primitives
+- Thread pool (mặc định: 4 luồng) xử lý các thao tác blocking (file I/O, crypto, DNS)
+
+## Các Pha của Event Loop
+
+Event loop lặp qua 6 pha:
+
+```
+   ┌───────────────────────────┐
+┌─>│           timers          │ setTimeout / setInterval callbacks
+│  └─────────────┬─────────────┘
+│  ┌─────────────┴─────────────┐
+│  │     pending callbacks     │ I/O callbacks hoãn lại từ chu kỳ trước
+│  └─────────────┬─────────────┘
+│  ┌─────────────┴─────────────┐
+│  │       idle, prepare       │ nội bộ
+│  └─────────────┬─────────────┘
+│  ┌─────────────┴─────────────┐
+│  │           poll            │ nhận sự kiện I/O mới; thực thi I/O callbacks
+│  └─────────────┬─────────────┘
+│  ┌─────────────┴─────────────┐
+│  │           check           │ setImmediate() callbacks
+│  └─────────────┬─────────────┘
+│  ┌─────────────┴─────────────┐
+└──┤      close callbacks      │ socket.on('close', ...)
+   └───────────────────────────┘
+```
+
+## Microtasks (Hàng đợi Ưu tiên)
+
+Microtasks chạy **giữa mỗi pha**, không chỉ ở cuối:
+
+```
+process.nextTick()  — ưu tiên cao nhất, chạy trước mọi microtask
+Promise callbacks   — .then(), .catch(), .finally()
+queueMicrotask()    — microtask tường minh
+```
+
+**Quy tắc quan trọng**: process.nextTick() luôn chạy trước Promises.
+
+```js
+console.log('1')
+setTimeout(() => console.log('2'), 0)
+Promise.resolve().then(() => console.log('3'))
+process.nextTick(() => console.log('4'))
+console.log('5')
+
+// Output: 1 → 5 → 4 → 3 → 2
+```
+
+## setImmediate vs setTimeout(fn, 0)
+
+```js
+// Bên trong I/O callbacks:
+const fs = require('fs')
+fs.readFile('/file.txt', () => {
+  setTimeout(() => console.log('timeout'), 0)
+  setImmediate(() => console.log('immediate'))
+})
+// immediate chạy trước (pha check đến ngay sau poll)
+// Ngoài I/O: thứ tự không xác định (phụ thuộc trạng thái event loop)
+```
+
+## Điều Gì Block Event Loop?
+
+- Thao tác đồng bộ CPU-intensive (JSON.parse lớn, crypto nặng)
+- Vòng lặp đồng bộ lớn
+- Regex phức tạp trên chuỗi dài
+
+```js
+// ❌ Block event loop — không request nào được xử lý
+function fibonacci(n) {
+  if (n <= 1) return n
+  return fibonacci(n - 1) + fibonacci(n - 2)
+}
+
+// ✅ Non-blocking: chia nhỏ công việc với setImmediate
+function fibonacciAsync(n, cb) {
+  if (n <= 1) return setImmediate(() => cb(n))
+  setImmediate(() => fibonacciAsync(n-1, (r1) =>
+    fibonacciAsync(n-2, (r2) => setImmediate(() => cb(r1 + r2)))
+  ))
+}
+```
+
+## Mẹo Phỏng vấn
+"Giải thích event loop cho tôi" là câu hỏi phỏng vấn Node.js phổ biến nhất. Nắm vững các pha, ưu tiên microtask, và sự khác biệt giữa nextTick, microtasks và setImmediate.""",
+        },
+        "quiz": {
+            "title": "Quiz: Event Loop",
+            "description": "Kiểm tra hiểu biết về Node.js event loop.",
+            "questions": [
+                {
+                    "question": "Cái nào chạy trước: process.nextTick() hay Promise callback đã resolve?",
+                    "options": [
+                        "Promise callback chạy trước",
+                        "process.nextTick() luôn chạy trước",
+                        "Chạy theo thứ tự đăng ký",
+                        "Không cái nào — chúng ở các pha khác nhau",
+                    ],
+                    "explanation": "process.nextTick() có ưu tiên cao nhất trong hàng đợi microtask. Nó chạy trước mọi Promise callback, ngay cả khi Promise đã resolve trước khi nextTick được gọi.",
+                },
+                {
+                    "question": "Thứ tự output của setTimeout(fn, 0) vs setImmediate(fn) bên trong I/O callback là gì?",
+                    "options": [
+                        "Timeout luôn chạy trước",
+                        "setImmediate luôn chạy trước trong I/O callbacks",
+                        "Thứ tự ngẫu nhiên",
+                        "Cả hai chạy đồng thời",
+                    ],
+                    "explanation": "Trong pha poll (I/O callbacks), pha tiếp theo là 'check' nơi setImmediate chạy. setTimeout phải đợi pha timer tiếp theo, nên setImmediate chạy trước.",
+                },
+                {
+                    "question": "Tại sao thao tác đồng bộ CPU-intensive có thể gây nguy hiểm trong Node.js?",
+                    "options": [
+                        "Nó crash V8 engine",
+                        "Nó block event loop, ngăn mọi request khác được xử lý",
+                        "Nó tăng memory usage theo cấp số nhân",
+                        "Code đồng bộ luôn nguy hiểm trong Node.js",
+                    ],
+                    "explanation": "Vì Node.js chạy trên một luồng duy nhất, thao tác đồng bộ CPU-intensive block hoàn toàn event loop. Không I/O, timer hay request nào được xử lý cho đến khi nó kết thúc.",
+                },
+                {
+                    "question": "Kích thước thread pool mặc định của libuv là bao nhiêu?",
+                    "options": ["2", "4", "8", "Phụ thuộc số CPU cores"],
+                    "explanation": "libuv tạo thread pool với 4 luồng mặc định. Có thể thay đổi bằng biến môi trường UV_THREADPOOL_SIZE (tối đa 1024).",
+                },
+                {
+                    "question": "Thao tác nào sử dụng libuv thread pool?",
+                    "options": [
+                        "Tất cả thao tác I/O bao gồm network requests",
+                        "Thao tác file system, DNS lookup và crypto",
+                        "Chỉ setTimeout và setInterval",
+                        "Tất cả thao tác bất đồng bộ trong Node.js",
+                    ],
+                    "explanation": "File I/O, DNS lookups (dns.lookup) và crypto CPU-intensive sử dụng thread pool. Network I/O (HTTP requests) được OS kernel xử lý native, không qua thread pool.",
+                },
+            ],
+        },
+    },
+    "nodejs_modules": {
+        "lesson": {
+            "title": "Modules & npm: Quản lý Package trong Node.js",
+            "content": """# Modules & npm
+
+Node.js hỗ trợ hai hệ thống module: **CommonJS** (require) và **ECMAScript Modules** (import/export).
+
+## CommonJS (CJS)
+
+Hệ thống module truyền thống của Node.js. Đồng bộ, hoạt động ở mọi nơi.
+
+```js
+// math.js — exporting
+const add = (a, b) => a + b
+const PI = 3.14159
+module.exports = { add, PI }
+// hoặc: exports.add = add
+
+// app.js — importing
+const { add, PI } = require('./math')
+console.log(add(2, 3)) // 5
+```
+
+**Cách require() hoạt động nội bộ:**
+1. Resolve — tìm file
+2. Load — đọc nội dung file
+3. Wrap — bọc trong function: `(function(exports, require, module, __filename, __dirname) { ... })`
+4. Evaluate — thực thi function đã bọc
+5. Cache — lưu kết quả vào `require.cache`
+
+## ECMAScript Modules (ESM)
+
+Tiêu chuẩn hiện đại. Phải dùng đuôi `.mjs` hoặc `"type": "module"` trong package.json.
+
+```js
+// math.mjs — exporting
+export const add = (a, b) => a + b
+export const PI = 3.14159
+export default function greet(name) { return `Hello ${name}` }
+
+// app.mjs — importing
+import greet, { add, PI } from './math.mjs'
+console.log(add(2, 3))
+```
+
+| Tính năng | CJS | ESM |
+|-----------|-----|-----|
+| Cú pháp | require() / module.exports | import / export |
+| Cách tải | Đồng bộ | Bất đồng bộ |
+| Tree shaking | Không | Có |
+| Top-level await | Không | Có |
+| Strict mode | Không | Có (ngầm định) |
+
+**Quy tắc CJS → ESM:**
+- CJS không thể `require()` ESM (dùng dynamic import)
+- ESM có thể `import` CJS (chỉ default import, không named destructuring)
+- ESM có thể dùng `import()` để tải CJS động
+
+## package.json Cơ bản
+
+```json
+{
+  "name": "my-express-api",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}
+```
+
+## Semantic Versioning (semver)
+
+```
+^4.18.2  → tương thích với 4.x.x  (>=4.18.2 <5.0.0)
+~4.18.2  → tương thích với 4.18.x (>=4.18.2 <4.19.0)
+4.18.2   → chính xác phiên bản này
+*        → mọi phiên bản (nguy hiểm!)
+```
+
+`npm ci` (clean install) dùng phiên bản chính xác từ `package-lock.json` — luôn dùng trong CI/CD.
+
+## Best Practices
+
+- Dùng `npm ci` trong CI/CD (nhanh và reproducible hơn)
+- Commit `package-lock.json` (nhưng không bao giờ sửa thủ công)
+- Dùng `npx` cho CLI tool dùng một lần
+- Chạy `npm audit` định kỳ
+- Dùng trường `"engines"` để chỉ định phiên bản Node.js
+
+## Mẹo Phỏng vấn
+"Tại sao chọn ESM thay vì CommonJS?" — ESM cho phép tree shaking để bundle nhỏ hơn, hỗ trợ top-level await và là tiêu chuẩn web. Với dự án mới, ESM được khuyến nghị. Với codebase hiện có, chi phí migration có thể không đáng.""",
+        },
+        "quiz": {
+            "title": "Quiz: Modules & npm",
+            "description": "Kiểm tra kiến thức về Node.js modules và npm.",
+            "questions": [
+                {
+                    "question": "`^4.18.2` cho phép những phiên bản nào trong semver?",
+                    "options": [
+                        "Chỉ chính xác phiên bản 4.18.2",
+                        "Mọi phiên bản >= 4.18.2 và < 5.0.0",
+                        "Mọi phiên bản >= 4.18.2 và < 4.19.0",
+                        "Mọi phiên bản bao gồm 5.0.0 trở lên",
+                    ],
+                    "explanation": "Dấu mũ ^ cho phép thay đổi không làm thay đổi chữ số khác không đầu tiên bên trái. Với ^4.18.2, nó chấp nhận mọi phiên bản 4.x.x >= 4.18.2.",
+                },
+                {
+                    "question": "Tại sao nên dùng `npm ci` thay vì `npm install` trong CI/CD pipeline?",
+                    "options": [
+                        "Nó tự động cài phiên bản mới hơn",
+                        "Nó dùng phiên bản chính xác từ package-lock.json và nhanh hơn",
+                        "Nó chỉ cài devDependencies",
+                        "Nó tạo package-lock.json mới",
+                    ],
+                    "explanation": "npm ci được thiết kế cho môi trường CI. Nó dùng phiên bản chính xác từ package-lock.json (không phân giải phiên bản), xóa node_modules trước và nhanh hơn đáng kể so với npm install.",
+                },
+                {
+                    "question": "CommonJS module có thể require() trực tiếp ES module không?",
+                    "options": [
+                        "Có, với require('./module.mjs')",
+                        "Không, CommonJS không thể require ES modules — dùng dynamic import() thay thế",
+                        "Có, nếu 'type: module' có trong package.json",
+                        "Có, CJS và ESM hoàn toàn tương thích với nhau",
+                    ],
+                    "explanation": "CommonJS không thể require đồng bộ ES modules vì ESM tải bất đồng bộ. Dùng `import('./module.mjs')` trả về Promise, hoặc chuyển sang ESM.",
+                },
+                {
+                    "question": "Một lợi thế của ES modules so với CommonJS là gì?",
+                    "options": [
+                        "ESM file tải đồng bộ nên nhanh hơn",
+                        "ESM cho phép tree shaking và hỗ trợ top-level await",
+                        "ESM là bắt buộc cho mọi npm package",
+                        "ESM dùng ít bộ nhớ hơn CJS",
+                    ],
+                    "explanation": "ES modules hỗ trợ static analysis (cho phép tree shaking để loại bỏ code không dùng) và top-level await. Chúng cũng là tiêu chuẩn cho JavaScript hiện đại và trình duyệt.",
+                },
+                {
+                    "question": "Object `require.cache` làm gì?",
+                    "options": [
+                        "Lưu tất cả URL npm registry",
+                        "Cache module đã tải để không thực thi lại trong các lần require sau",
+                        "Lưu biến môi trường",
+                        "Cache HTTP response từ module",
+                    ],
+                    "explanation": "Khi một module được tải với require(), nó được lưu trong require.cache. Các lần require() sau trả về cached exports mà không thực thi lại code module.",
+                },
+            ],
+        },
+    },
+    "nodejs_filesystem": {
+        "lesson": {
+            "title": "File System & Streams: Xử lý Dữ liệu Hiệu quả",
+            "content": """# File System & Streams
+
+Node.js cung cấp module **fs** cho thao tác file và **streams** để xử lý lượng dữ liệu lớn hiệu quả.
+
+## File System (fs)
+
+Node.js cung cấp ba cách làm việc với file:
+
+### 1. Đồng bộ (blocking)
+```js
+const fs = require('fs')
+const data = fs.readFileSync('/file.txt', 'utf8')
+console.log(data)
+fs.writeFileSync('/output.txt', 'Hello World')
+```
+
+### 2. Callback-based (async, non-blocking)
+```js
+fs.readFile('/file.txt', 'utf8', (err, data) => {
+  if (err) return console.error(err)
+  console.log(data)
+})
+```
+
+### 3. Promise-based (fs/promises)
+```js
+const fs = require('fs/promises')
+async function readFile() {
+  try {
+    const data = await fs.readFile('/file.txt', 'utf8')
+    console.log(data)
+  } catch (err) {
+    console.error(err)
+  }
+}
+```
+
+**Quy tắc**: Luôn dùng promise-based hoặc callback API trong production. Phương thức đồng bộ block event loop.
+
+### Các Thao tác fs Phổ biến
+```js
+fs.existsSync(path)          // kiểm tra path tồn tại
+fs.mkdir('dir', { recursive: true }) // tạo cây thư mục
+fs.readdir('/path')          // liệt kê nội dung thư mục
+fs.stat('/file')             // lấy metadata file
+fs.unlink('/file')           // xóa file
+fs.rename('/old', '/new')    // di chuyển/đổi tên
+fs.access('/file', fs.constants.R_OK) // kiểm tra quyền
+```
+
+## Module path
+```js
+const path = require('path')
+path.join('/users', 'alice', 'docs')      // → \\users\\alice\\docs (đa nền tảng)
+path.resolve('src', 'index.js')           // → đường dẫn tuyệt đối
+path.extname('file.txt')                  // → .txt
+path.basename('/users/file.txt')          // → file.txt
+path.dirname('/users/file.txt')           // → /users
+path.parse('/users/alice/docs/file.txt')  // → { root, dir, base, ext, name }
+```
+
+## Streams
+
+Streams xử lý dữ liệu **từng chunk một** mà không tải toàn bộ vào bộ nhớ.
+
+### Bốn Loại Streams
+| Loại | Mục đích | Ví dụ |
+|------|----------|-------|
+| Readable | Đọc dữ liệu từ nguồn | fs.createReadStream() |
+| Writable | Ghi dữ liệu đến đích | fs.createWriteStream() |
+| Duplex | Vừa đọc vừa ghi | net.Socket |
+| Transform | Biến đổi dữ liệu khi đi qua | zlib.createGzip() |
+
+### Piping Streams
+```js
+const { createReadStream, createWriteStream } = require('fs')
+const { createGzip } = require('zlib')
+
+// Đọc → Nén → Ghi (tất cả streaming, bộ nhớ tối thiểu)
+createReadStream('input.txt')
+  .pipe(createGzip())
+  .pipe(createWriteStream('output.txt.gz'))
+  .on('finish', () => console.log('Nén xong!'))
+```
+
+### Custom Transform Stream
+```js
+const { Transform } = require('stream')
+
+const upperCaseTransform = new Transform({
+  transform(chunk, encoding, callback) {
+    this.push(chunk.toString().toUpperCase())
+    callback()
+  }
+})
+
+process.stdin.pipe(upperCaseTransform).pipe(process.stdout)
+```
+
+## Khi Nào Dùng Streams vs readFile
+
+| Tình huống | Nên dùng |
+|------------|----------|
+| File config nhỏ (vài KB) | readFile / readFileSync |
+| File JSON 10MB | readFile (ổn cho 10MB) |
+| Xử lý dữ liệu CSV 2GB | createReadStream (nếu không bộ nhớ sẽ nổ) |
+| Real-time log tailing | createReadStream với watch |
+| HTTP file server | pipe file stream vào response |
+
+## Mẹo Phỏng vấn
+"Khi nào bạn dùng streams?" — "Khi xử lý file lớn. Đọc file 2GB với readFileSync sẽ crash process. Streams xử lý dữ liệu theo chunk, giữ bộ nhớ ổn định bất kể kích thước file.""",
+        },
+        "quiz": {
+            "title": "Quiz: File System & Streams",
+            "description": "Kiểm tra kiến thức về Node.js file system và streams.",
+            "questions": [
+                {
+                    "question": "Tại sao nên tránh fs.readFileSync() trong web server?",
+                    "options": [
+                        "Nó trả về Buffer thay vì string",
+                        "Nó block event loop, ngăn server xử lý request khác",
+                        "Nó không hỗ trợ UTF-8 encoding",
+                        "Phương thức đồng bộ đã deprecated trong Node.js",
+                    ],
+                    "explanation": "Phương thức đồng bộ block event loop. Nếu readFileSync mất 100ms cho file lớn, server không thể xử lý bất kỳ request nào khác trong thời gian đó — bao gồm cả kết nối mới đến.",
+                },
+                {
+                    "question": "Ưu điểm chính của streams so với đọc toàn bộ file một lần là gì?",
+                    "options": [
+                        "Streams luôn nhanh hơn",
+                        "Streams xử lý dữ liệu theo chunk, giữ bộ nhớ thấp bất kể kích thước file",
+                        "Streams chỉ dùng cho text file",
+                        "Streams tự động nén dữ liệu",
+                    ],
+                    "explanation": "Streams xử lý dữ liệu theo chunk nhỏ. File 2GB streamed dùng ~16KB bộ nhớ, trong khi đọc toàn bộ sẽ tiêu tốn 2GB+ bộ nhớ.",
+                },
+                {
+                    "question": "Phương thức .pipe() làm gì trong Node.js streams?",
+                    "options": [
+                        "Tạo Unix pipe đến external process",
+                        "Kết nối output của stream này với input của stream khác, tự động xử lý backpressure",
+                        "Buffer tất cả dữ liệu trước khi ghi",
+                        "Chuyển đổi stream thành Promise",
+                    ],
+                    "explanation": "pipe() kết nối readable stream với writable stream. Nó tự động xử lý backpressure — tạm dừng readable stream khi writable chậm và tiếp tục khi sẵn sàng.",
+                },
+                {
+                    "question": "Phương thức path nào tạo đường dẫn đa nền tảng?",
+                    "options": [
+                        "path.resolve()",
+                        "path.join()",
+                        "path.normalize()",
+                        "path.concat()",
+                    ],
+                    "explanation": "path.join() nối các đoạn đường dẫn dùng dấu phân cách đúng cho nền tảng (/ trên Linux, \\ trên Windows). Luôn dùng nó thay vì nối chuỗi thủ công.",
+                },
+                {
+                    "question": "Transform stream là gì?",
+                    "options": [
+                        "Stream chỉ có thể đọc dữ liệu",
+                        "Stream biến đổi dữ liệu khi đi qua — vừa readable vừa writable",
+                        "Stream ghi dữ liệu đến nhiều đích",
+                        "Stream chuyển đổi giữa các định dạng file",
+                    ],
+                    "explanation": "Transform stream là Duplex stream có khả năng sửa đổi hoặc biến đổi dữ liệu khi đi qua. Ví dụ: zlib compression, crypto encryption, chuyển đổi CSV → JSON.",
+                },
+            ],
+        },
+    },
+    "nodejs_express": {
+        "lesson": {
+            "title": "Express.js: Xây dựng REST API",
+            "content": """# Express.js Cơ bản
+
+Express.js là web framework Node.js phổ biến nhất. Nó cung cấp routing, middleware và HTTP utilities trên nền module `http` có sẵn của Node.
+
+## Server Cơ bản
+
+```js
+const express = require('express')
+const app = express()
+
+app.get('/', (req, res) => {
+  res.json({ message: 'Hello World' })
+})
+
+app.listen(3000, () => console.log('Server on http://localhost:3000'))
+```
+
+## Routing
+
+```js
+// Route parameters
+app.get('/users/:id', (req, res) => {
+  const userId = req.params.id
+  res.json({ userId })
+})
+
+// Query strings: GET /users?page=2&limit=10
+app.get('/users', (req, res) => {
+  const { page = 1, limit = 10 } = req.query
+  res.json({ page: Number(page), limit: Number(limit) })
+})
+
+// Nhóm route với Router
+const router = express.Router()
+router.get('/', listUsers)
+router.post('/', createUser)
+router.get('/:id', getUser)
+router.put('/:id', updateUser)
+router.delete('/:id', deleteUser)
+app.use('/api/users', router)
+```
+
+## Middleware
+
+Hàm middleware có quyền truy cập vào `req`, `res` và hàm `next`.
+
+```js
+// Application-level middleware
+app.use(express.json())        // parse JSON bodies
+app.use(express.urlencoded({ extended: true })) // parse form data
+
+// Custom middleware — chạy trên mọi request
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path}`)
+  next()
+})
+
+// Route-specific middleware
+const requireAuth = (req, res, next) => {
+  if (!req.headers.authorization) {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+  next()
+}
+app.get('/admin', requireAuth, adminHandler)
+
+// Error-handling middleware (4 tham số = error handler)
+app.use((err, req, res, next) => {
+  console.error(err.stack)
+  res.status(500).json({ error: 'Đã xảy ra lỗi!' })
+})
+```
+
+## Vòng đời Request
+
+```
+Request → middleware1 → middleware2 → route handler → response
+                ↓ (nếu lỗi)
+           error middleware → error response
+```
+
+## Bộ Middleware Phổ biến
+
+```js
+const express = require('express')
+const cors = require('cors')
+const helmet = require('helmet')
+const morgan = require('morgan')
+const rateLimit = require('express-rate-limit')
+
+const app = express()
+
+app.use(helmet())                // security headers
+app.use(cors())                  // cross-origin
+app.use(morgan('dev'))           // logging
+app.use(rateLimit({              // rate limiting
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+}))
+app.use(express.json())
+```
+
+## REST API Conventions
+
+| Method | Endpoint | Mục đích |
+|--------|----------|----------|
+| GET | /api/users | Liệt kê users |
+| GET | /api/users/:id | Lấy user theo ID |
+| POST | /api/users | Tạo user |
+| PUT | /api/users/:id | Thay thế user |
+| PATCH | /api/users/:id | Cập nhật một phần |
+| DELETE | /api/users/:id | Xóa user |
+
+**Định dạng response:**
+```json
+{
+  "success": true,
+  "data": { "id": 1, "name": "Alice" }
+}
+```
+
+**Định dạng lỗi:**
+```json
+{
+  "success": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Tên là bắt buộc"
+  }
+}
+```
+
+## Production Best Practices
+
+- Dùng module `cluster` hoặc PM2 để tận dụng multi-core
+- Đặt `NODE_ENV=production` (bật caching và tắt verbose errors)
+- Không để lộ stack trace trong production
+- Dùng middleware `compression` cho gzip
+- Đặt đúng HTTP status codes (200, 201, 204, 400, 401, 403, 404, 500)
+- Không dùng `res.send()` với user input — ưu tiên `res.json()`
+
+## Mẹo Phỏng vấn
+"Thiết kế API cho todo app" — thể hiện RESTful endpoints, HTTP methods đúng, error handling, URL parameterization và middleware cho validation/auth. Điều này chứng tỏ bạn nghĩ về toàn bộ vòng đời request.""",
+        },
+        "quiz": {
+            "title": "Quiz: Express.js",
+            "description": "Kiểm tra kiến thức về xây dựng REST API với Express.js.",
+            "questions": [
+                {
+                    "question": "Thứ tự thực thi middleware đúng trong Express là gì?",
+                    "options": [
+                        "Route handler → middleware → error handler",
+                        "Middleware → route handler → error handler (nếu có lỗi)",
+                        "Error handler → middleware → route handler",
+                        "Thứ tự ngẫu nhiên dựa trên async completion",
+                    ],
+                    "explanation": "Express xử lý middleware theo thứ tự đăng ký. Nếu middleware gọi next() không lỗi, chuỗi tiếp tục. Nếu next(err) được gọi, Express nhảy đến error-handling middleware.",
+                },
+                {
+                    "question": "Sự khác biệt giữa app.use() và app.get() là gì?",
+                    "options": [
+                        "app.use() chỉ xử lý POST requests",
+                        "app.use() khớp mọi HTTP method và prefix path; app.get() chỉ khớp GET requests trên path chính xác",
+                        "app.use() chỉ cho middleware; app.get() chỉ cho route handlers",
+                        "Không có sự khác biệt",
+                    ],
+                    "explanation": "app.use() là middleware mount — nó khớp mọi HTTP method và kích hoạt cho URL prefixes. app.get() (và post, put, v.v.) chỉ khớp method được chỉ định và path chính xác.",
+                },
+                {
+                    "question": "Làm thế nào Express phân biệt error-handling middleware với middleware thông thường?",
+                    "options": [
+                        "Bằng cách đặt tiền tố tên hàm là 'error'",
+                        "Bằng cách nhận 4 tham số: (err, req, res, next)",
+                        "Bằng cách dùng app.error() thay vì app.use()",
+                        "Bằng cách đặt status code thành 500",
+                    ],
+                    "explanation": "Express nhận diện error-handling middleware qua số lượng tham số (arity). Hàm có 4 tham số được xử lý như error handler và nhận error là tham số đầu tiên.",
+                },
+                {
+                    "question": "HTTP status code nào endpoint POST /users nên trả về khi thành công?",
+                    "options": ["200 OK", "201 Created", "204 No Content", "302 Found"],
+                    "explanation": "201 Created là status đúng cho việc tạo resource thành công. Trả về resource đã tạo trong response body và tùy chọn Location header với URL resource mới.",
+                },
+                {
+                    "question": "Tại sao dùng compression middleware trong production?",
+                    "options": [
+                        "Nó làm JavaScript thực thi nhanh hơn",
+                        "Nó gzip response body, giảm đáng kể bandwidth cho JSON/text responses",
+                        "Nó minify JavaScript code gửi đến client",
+                        "Nó nén request body từ client",
+                    ],
+                    "explanation": "Compression middleware gzip response body. Với JSON APIs, điều này có thể giảm kích thước response 60-80%, cải thiện latency và giảm chi phí bandwidth.",
+                },
+            ],
+        },
+    },
+    "nodejs_async": {
+        "lesson": {
+            "title": "Các Pattern Bất đồng bộ: Callbacks, Promises và async/await",
+            "content": """# Các Pattern Bất đồng bộ trong Node.js
+
+Node.js về cơ bản là bất đồng bộ. Hiểu sự tiến hóa từ callbacks đến async/await là điều thiết yếu.
+
+## 1. Callbacks (Cách Cũ)
+
+```js
+const fs = require('fs')
+
+fs.readFile('/data.json', 'utf8', (err, data) => {
+  if (err) return console.error('Thất bại:', err)
+  try {
+    const parsed = JSON.parse(data)
+    console.log(parsed)
+  } catch (e) {
+    console.error('JSON không hợp lệ')
+  }
+})
+```
+
+### Callback Hell (Kim tự tháp Hủy diệt)
+
+```js
+// ❌ Callback lồng nhau — khó đọc, khó debug
+getUser(id, (err, user) => {
+  if (err) return handleError(err)
+  getOrders(user.id, (err, orders) => {
+    if (err) return handleError(err)
+    getDetails(orders[0].id, (err, details) => {
+      if (err) return handleError(err)
+      renderPage(user, orders, details)
+    })
+  })
+})
+```
+
+## 2. Promises
+
+```js
+function readFilePromise(path) {
+  return new Promise((resolve, reject) => {
+    fs.readFile(path, 'utf8', (err, data) => {
+      err ? reject(err) : resolve(data)
+    })
+  })
+}
+
+// Chaining — phẳng hơn callbacks
+readFilePromise('/data.json')
+  .then(data => JSON.parse(data))
+  .then(parsed => console.log(parsed))
+  .catch(err => console.error('Thất bại:', err))
+```
+
+### Promise.all / Promise.allSettled / Promise.race
+
+```js
+// all — fail nhanh nếu bất kỳ promise nào reject
+const [user, posts] = await Promise.all([
+  fetchUser(1),
+  fetchPosts(1),
+])
+
+// allSettled — đợi tất cả, không bao giờ reject
+const results = await Promise.allSettled([
+  fetchUser(1),
+  fetchUser(2),
+  fetchUser(999), // có thể fail
+])
+// results: [{ status: 'fulfilled', value: ... }, { status: 'rejected', reason: ... }]
+
+// race — resolve/reject với promise hoàn thành đầu tiên
+const result = await Promise.race([
+  fetchWithTimeout('/api', 5000),
+  timeout(5000), // reject sau 5s
+])
+```
+
+## 3. async/await (Tiêu chuẩn Hiện đại)
+
+```js
+async function loadDashboard(userId) {
+  try {
+    const user = await fetchUser(userId)
+    const orders = await fetchOrders(user.id)
+    return { user, orders }
+  } catch (err) {
+    console.error('Không thể tải dashboard:', err)
+    throw new Error('Dashboard không khả dụng')
+  }
+}
+
+// Top-level await (chỉ ESM)
+const config = await fs.readFile('./config.json', 'utf8')
+```
+
+### Lỗi Async Phổ biến
+
+```js
+// ❌ Tuần tự trong khi có thể song song
+const user = await fetchUser(id)      // đợi 200ms
+const posts = await fetchPosts(id)    // đợi 200ms
+// Tổng: 400ms
+
+// ✅ Song song với Promise.all
+const [user, posts] = await Promise.all([
+  fetchUser(id),
+  fetchPosts(id),
+])
+// Tổng: 200ms
+
+// ❌ forEach với async (không await!)
+users.forEach(async (user) => {
+  await saveUser(user) // BUG: không được await!
+})
+
+// ✅ for...of hoặc Promise.all với map
+for (const user of users) {
+  await saveUser(user) // hoạt động cho tuần tự
+}
+// hoặc
+await Promise.all(users.map(user => saveUser(user)))
+```
+
+## Các Pattern Xử lý Lỗi
+
+```js
+// Pattern 1: try/catch (khuyến nghị cho async/await)
+async function handler(req, res) {
+  try {
+    const data = await processRequest(req)
+    res.json(data)
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+}
+
+// Pattern 2: .catch() chain (cho promise chains)
+fetchData()
+  .then(processData)
+  .then(sendResponse)
+  .catch(handleError)
+
+// Pattern 3: Express async wrapper (bắt rejected promises)
+const asyncHandler = (fn) => (req, res, next) =>
+  Promise.resolve(fn(req, res, next)).catch(next)
+
+app.get('/users', asyncHandler(async (req, res) => {
+  const users = await db.users.findAll()
+  res.json(users)
+}))
+```
+
+## util.promisify
+
+Chuyển đổi hàm callback-based thành promise-based:
+
+```js
+const { promisify } = require('util')
+const fs = require('fs')
+
+const readFile = promisify(fs.readFile)
+const data = await readFile('/file.txt', 'utf8')
+```
+
+## Mẹo Phỏng vấn
+"Khi nào dùng Promise.all vs sequential await?" — "Promise.all khi các thao tác độc lập (fetch user và posts từ các endpoint khác nhau). Sequential await khi mỗi thao tác phụ thuộc vào kết quả trước đó." Điều này thể hiện bạn hiểu cả tính đúng đắn và hiệu suất.""",
+        },
+        "quiz": {
+            "title": "Quiz: Các Pattern Bất đồng bộ",
+            "description": "Kiểm tra hiểu biết về async/await, Promises và xử lý lỗi.",
+            "questions": [
+                {
+                    "question": "Vấn đề khi dùng forEach với async/await là gì?",
+                    "options": [
+                        "forEach không hỗ trợ callbacks",
+                        "forEach không đợi async callbacks — chúng được kích hoạt và bị bỏ quên",
+                        "forEach gây memory leaks với async functions",
+                        "forEach chỉ hoạt động với synchronous functions",
+                    ],
+                    "explanation": "Array.forEach() không await giá trị trả về của callback. Nếu bạn truyền async function, nó sẽ kích hoạt tất cả ngay lập tức mà không đợi bất kỳ cái nào hoàn thành.",
+                },
+                {
+                    "question": "Sự khác biệt giữa Promise.all và Promise.allSettled là gì?",
+                    "options": [
+                        "Không có sự khác biệt",
+                        "Promise.all reject ngay nếu bất kỳ promise nào reject; Promise.allSettled đợi tất cả và trả về cả fulfilled và rejected results",
+                        "Promise.allSettled chậm hơn",
+                        "Promise.all chỉ hoạt động với chính xác 2 promises",
+                    ],
+                    "explanation": "Promise.all dừng ngay khi có rejection đầu tiên. Promise.allSettled luôn đợi tất cả promises và trả về mảng các object {status, value|reason} — lý tưởng khi bạn muốn kết quả một phần.",
+                },
+                {
+                    "question": "Khi nào nên dùng sequential await thay vì Promise.all?",
+                    "options": [
+                        "Luôn luôn — sequential đơn giản hơn",
+                        "Khi mỗi thao tác async phụ thuộc vào kết quả của thao tác trước đó",
+                        "Khi bạn muốn hiệu suất tốt hơn",
+                        "Sequential await luôn nhanh hơn",
+                    ],
+                    "explanation": "Dùng sequential await khi các thao tác có dependency: bạn cần user ID từ lần gọi đầu để fetch orders ở lần thứ hai. Dùng Promise.all khi các thao tác độc lập để có hiệu suất tốt hơn.",
+                },
+                {
+                    "question": "util.promisify() làm gì?",
+                    "options": [
+                        "Chuyển synchronous functions thành async",
+                        "Chuyển callback-based functions (pattern err, result) thành Promise-based",
+                        "Làm promises chạy nhanh hơn",
+                        "Tạo Promise mới từ đầu",
+                    ],
+                    "explanation": "util.promisify() bọc một hàm theo quy ước callback của Node.js (error-first: (err, result)) và trả về phiên bản promise-based. Ví dụ: promisify(fs.readFile).",
+                },
+                {
+                    "question": "Điều gì xảy ra với unhandled Promise rejection trong Node.js?",
+                    "options": [
+                        "Nó bị bỏ qua âm thầm",
+                        "Nó kích hoạt sự kiện 'unhandledRejection' và sẽ terminate process trong các phiên bản Node.js tương lai",
+                        "Nó tự động retry promise",
+                        "Nó log warning nhưng tiếp tục thực thi",
+                    ],
+                    "explanation": "Unhandled promise rejections phát ra sự kiện process 'unhandledRejection'. Từ Node.js 15+, chúng terminate process (giống uncaught exceptions). Luôn thêm .catch() hoặc dùng try/catch với await.",
+                },
+            ],
+        },
+    },
+}
+
+GO_LESSON_TRANSLATIONS_VI: dict[str, dict] = {
+    "go_basics": {
+        "lesson": {
+            "title": "Go Cơ bản: Biến, Kiểu dữ liệu và Hàm",
+            "content": """# Go Cơ bản & Cú pháp
+
+Go là ngôn ngữ biên dịch, kiểu tĩnh, được thiết kế cho sự đơn giản và hiệu suất.
+
+## Hello World
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+    fmt.Println("Hello, World!")
+}
+```
+
+Mỗi file Go bắt đầu với khai báo `package`. Package `main` là điểm vào (entry point).
+
+## Biến
+
+Go có ba cách khai báo biến:
+
+```go
+// 1. Từ khóa var (kiểu tường minh)
+var name string = "Alice"
+var age int = 30
+
+// 2. var với type inference
+var city = "Hanoi"
+
+// 3. Khai báo ngắn (chỉ trong hàm)
+score := 95
+```
+
+**Quy tắc quan trọng:** `:=` chỉ hoạt động trong hàm. Dùng `var` ở package level.
+
+## Kiểu Dữ liệu Cơ bản
+
+| Kiểu | Ví dụ | Zero Value |
+|------|-------|------------|
+| `int`, `int64` | `42`, `-7` | `0` |
+| `float64` | `3.14` | `0.0` |
+| `string` | `"hello"` | `""` |
+| `bool` | `true`, `false` | `false` |
+| `byte` | `'A'` (alias cho uint8) | `0` |
+
+```go
+var count int = 10
+var price float64 = 9.99
+var message string = "Go is great"
+var isActive bool = true
+```
+
+## Hằng số
+
+```go
+const Pi = 3.14159
+const MaxRetries = 3
+
+// iota cho enum
+type Direction int
+const (
+    North Direction = iota // 0
+    East                   // 1
+    South                  // 2
+    West                   // 3
+)
+```
+
+## Hàm
+
+```go
+// Hàm cơ bản
+func add(a int, b int) int {
+    return a + b
+}
+
+// Multiple return values (rất phổ biến trong Go!)
+func divide(a, b float64) (float64, error) {
+    if b == 0 {
+        return 0, fmt.Errorf("không thể chia cho 0")
+    }
+    return a / b, nil
+}
+
+// Named return values
+func minMax(nums []int) (min, max int) {
+    min, max = nums[0], nums[0]
+    for _, n := range nums {
+        if n < min { min = n }
+        if n > max { max = n }
+    }
+    return // "naked return" - trả về named values
+}
+```
+
+## Control Flow
+
+```go
+// if / else (không cần ngoặc đơn!)
+if score >= 90 {
+    fmt.Println("Điểm A")
+} else if score >= 80 {
+    fmt.Println("Điểm B")
+} else {
+    fmt.Println("Cố gắng thêm")
+}
+
+// if với initializer
+if err := doSomething(); err != nil {
+    fmt.Println("Lỗi:", err)
+}
+
+// for (vòng lặp duy nhất trong Go)
+for i := 0; i < 5; i++ {
+    fmt.Println(i)
+}
+
+// while-style for
+for count > 0 {
+    count--
+}
+
+// range qua slice
+fruits := []string{"táo", "chuối", "xoài"}
+for index, fruit := range fruits {
+    fmt.Printf("%d: %s\\n", index, fruit)
+}
+
+// switch
+switch day {
+case "Thứ 2", "Thứ 3":
+    fmt.Println("Đầu tuần")
+case "Thứ 6":
+    fmt.Println("Sắp cuối tuần!")
+default:
+    fmt.Println("Giữa tuần")
+}
+```
+
+## Packages và Imports
+
+```go
+import (
+    "fmt"      // formatted I/O
+    "math"     // hàm toán học
+    "strings"  // tiện ích chuỗi
+    "strconv"  // chuyển đổi chuỗi
+)
+
+// Chỉ exported names bắt đầu bằng chữ in hoa
+fmt.Println(math.Sqrt(16))   // ✅ exported
+// math.sqrt(16)              // ❌ không exported
+```
+
+## Mẹo Phỏng vấn
+Go dùng **chữ in hoa** để kiểm soát truy cập — uppercase = exported (public), lowercase = unexported (private). Không có từ khóa `public`/`private`.""",
+        },
+        "quiz": {
+            "title": "Quiz: Go Cơ bản",
+            "description": "Kiểm tra hiểu biết về cú pháp Go cơ bản.",
+            "questions": [
+                {
+                    "question": "Cách nào khai báo biến đúng trong Go bên trong một hàm?",
+                    "options": [
+                        "int count = 10",
+                        "count := 10",
+                        "let count = 10",
+                        "declare count int = 10",
+                    ],
+                    "explanation": "Khai báo ngắn `:=` là cách Go idiomatic để khai báo và khởi tạo biến trong hàm. `int count = 10` là cú pháp kiểu C và không hợp lệ trong Go.",
+                },
+                {
+                    "question": "Zero value của `string` trong Go là gì?",
+                    "options": ["null", "nil", '""', "undefined"],
+                    "explanation": 'Trong Go, mọi biến đều có zero value. Với string, đó là chuỗi rỗng `""`. Go không bao giờ có biến chưa khởi tạo.',
+                },
+                {
+                    "question": "Go xử lý multiple return values từ hàm như thế nào?",
+                    "options": [
+                        "Dùng array",
+                        "Dùng struct",
+                        "Hàm Go có thể native trả về nhiều giá trị liệt kê trong ngoặc đơn",
+                        "Dùng pointer argument",
+                    ],
+                    "explanation": "Go hỗ trợ multiple return values native: `func divide(a, b float64) (float64, error)`. Đây là cách phổ biến để trả về kết quả và lỗi cùng nhau.",
+                },
+                {
+                    "question": "Điều gì làm một tên được exported (public) trong Go?",
+                    "options": [
+                        "Dùng từ khóa `export`",
+                        "Thêm modifier `public`",
+                        "Bắt đầu tên bằng chữ in hoa",
+                        "Khai báo ở package level",
+                    ],
+                    "explanation": "Trong Go, bất kỳ identifier nào (hàm, kiểu, biến) bắt đầu bằng chữ in hoa đều được exported và truy cập được từ package khác. Chữ thường nghĩa là unexported (package-private).",
+                },
+                {
+                    "question": "Go dùng cấu trúc vòng lặp nào?",
+                    "options": [
+                        "for, while, và do-while",
+                        "Chỉ while",
+                        "Chỉ for (dùng như for, while, và infinite loop)",
+                        "foreach và for",
+                    ],
+                    "explanation": "Go chỉ có một từ khóa vòng lặp: `for`. Nó bao gồm for truyền thống, while-style (`for condition {}`) và infinite loop (`for {}`). Duyệt range dùng `for i, v := range slice`.",
+                },
+            ],
+        },
+    },
+    "go_slices_maps": {
+        "lesson": {
+            "title": "Slices & Maps: Cấu trúc Dữ liệu Cốt lõi của Go",
+            "content": """# Slices & Maps
+
+Go cung cấp hai kiểu collection built-in mạnh mẽ: **slices** (mảng động) và **maps** (bảng băm).
+
+## Slices
+
+Slice là một view linh hoạt vào underlying array.
+
+```go
+// Tạo slices
+nums := []int{1, 2, 3, 4, 5}     // slice literal
+empty := make([]int, 0)            // slice rỗng
+sized := make([]int, 5)            // độ dài 5, zero-filled
+withCap := make([]int, 3, 10)      // độ dài 3, capacity 10
+```
+
+### Append
+
+```go
+nums = append(nums, 6)             // thêm một phần tử
+nums = append(nums, 7, 8, 9)      // thêm nhiều phần tử
+other := []int{10, 11}
+nums = append(nums, other...)      // spread một slice khác
+```
+
+**Quan trọng:** `append` có thể trả về slice mới nếu capacity bị vượt quá. Luôn gán lại: `nums = append(nums, val)`.
+
+### Slicing
+
+```go
+s := []int{0, 1, 2, 3, 4, 5}
+s[1:4]   // [1, 2, 3]  — index 1 đến 3
+s[:3]    // [0, 1, 2]  — từ đầu đến index 2
+s[3:]    // [3, 4, 5]  — từ index 3 đến cuối
+s[:]     // [0,1,2,3,4,5] — full copy view
+```
+
+⚠️ Slices chia sẻ underlying array — sửa một cái ảnh hưởng cái kia!
+
+```go
+// Copy an toàn để tránh aliasing
+dst := make([]int, len(src))
+copy(dst, src)
+```
+
+### Duyệt
+
+```go
+fruits := []string{"táo", "chuối", "xoài"}
+
+for i, fruit := range fruits {
+    fmt.Printf("[%d] %s\\n", i, fruit)
+}
+
+// Bỏ qua index
+for _, fruit := range fruits {
+    fmt.Println(fruit)
+}
+```
+
+### Các Pattern Slice Phổ biến
+
+```go
+// Filter (giữ số chẵn)
+func filter(nums []int) []int {
+    result := make([]int, 0)
+    for _, n := range nums {
+        if n%2 == 0 {
+            result = append(result, n)
+        }
+    }
+    return result
+}
+
+// Contains
+func contains(slice []string, item string) bool {
+    for _, s := range slice {
+        if s == item {
+            return true
+        }
+    }
+    return false
+}
+```
+
+## Maps
+
+Maps lưu cặp key-value với O(1) lookup trung bình.
+
+```go
+// Tạo maps
+ages := map[string]int{
+    "Alice": 30,
+    "Bob":   25,
+}
+
+// make
+scores := make(map[string]int)
+
+// Set
+scores["Alice"] = 95
+scores["Bob"] = 82
+
+// Get
+fmt.Println(scores["Alice"]) // 95
+fmt.Println(scores["Carol"]) // 0 — zero value cho key thiếu!
+
+// Kiểm tra tồn tại (luôn dùng comma-ok pattern)
+score, ok := scores["Carol"]
+if !ok {
+    fmt.Println("Không tìm thấy Carol")
+}
+
+// Delete
+delete(scores, "Bob")
+```
+
+### Duyệt Maps
+
+```go
+for key, value := range scores {
+    fmt.Printf("%s: %d\\n", key, value)
+}
+// Lưu ý: thứ tự duyệt map là NGẪU NHIÊN trong Go
+```
+
+### Maps Lồng nhau
+
+```go
+// map của slices
+groups := map[string][]string{
+    "backend":  {"Alice", "Bob"},
+    "frontend": {"Carol", "Dave"},
+}
+groups["backend"] = append(groups["backend"], "Eve")
+```
+
+## Structs vs Maps
+
+| Use Case | Chọn |
+|----------|------|
+| Trường cố định, đã biết | `struct` |
+| Key động lúc runtime | `map` |
+| JSON với key không biết trước | `map[string]interface{}` |
+
+## Mẹo Phỏng vấn
+Luôn dùng comma-ok pattern (`value, ok := m[key]`) khi đọc từ map. Không có nó, bạn không thể phân biệt key thiếu với giá trị được lưu trùng với zero value.""",
+        },
+        "quiz": {
+            "title": "Quiz: Slices & Maps",
+            "description": "Kiểm tra kiến thức về Go slices và maps.",
+            "questions": [
+                {
+                    "question": "`make([]int, 3, 10)` tạo ra gì?",
+                    "options": [
+                        "Slice 10 phần tử, tất cả được đặt thành 3",
+                        "Slice độ dài 3 và capacity 10, zero-filled",
+                        "Mảng kích thước 10 bắt đầu từ index 3",
+                        "Slice độ dài 10 và capacity 3",
+                    ],
+                    "explanation": "`make([]T, length, capacity)` tạo slice. Ở đây: length=3 (3 phần tử truy cập được, zero-valued) và capacity=10 (có thể phát triển đến 10 trước khi reallocation).",
+                },
+                {
+                    "question": "Tại sao luôn phải gán lại kết quả của `append`?",
+                    "options": [
+                        "append luôn tạo slice mới hoàn toàn",
+                        "append có thể cấp phát underlying array mới khi vượt capacity, làm slice cũ bị stale",
+                        "Go's garbage collector yêu cầu điều này",
+                        "append sửa slice tại chỗ nhưng trả về length",
+                    ],
+                    "explanation": "Khi capacity của slice bị vượt quá, `append` cấp phát mảng mới lớn hơn và copy phần tử. Biến gốc vẫn trỏ đến bộ nhớ cũ. Luôn dùng `s = append(s, val)`.",
+                },
+                {
+                    "question": "Kết quả khi đọc key không tồn tại từ map trong Go là gì?",
+                    "options": [
+                        "Runtime panic",
+                        "nil",
+                        "Zero value của value type của map",
+                        "Trả về error",
+                    ],
+                    "explanation": "Đọc key thiếu trả về zero value cho value type (0 cho int, \"\" cho string, v.v.) — không panic, không error. Luôn dùng `val, ok := m[key]` để phân biệt key thiếu với zero value.",
+                },
+                {
+                    "question": "Điều gì được đảm bảo khi duyệt Go map với `range`?",
+                    "options": [
+                        "Duyệt theo thứ tự chèn",
+                        "Duyệt theo thứ tự key alphabet",
+                        "Thứ tự duyệt là ngẫu nhiên và không được đảm bảo",
+                        "Duyệt được sắp xếp theo value",
+                    ],
+                    "explanation": "Go cố ý randomize thứ tự duyệt map mỗi lần chạy để ngăn developer dựa vào thứ tự cụ thể. Nếu cần output sắp xếp, thu thập keys vào slice và sort trước.",
+                },
+                {
+                    "question": "Làm thế nào để copy slice an toàn, tránh chia sẻ underlying array?",
+                    "options": [
+                        "dst = src",
+                        "dst := src[:]",
+                        "dst := make([]int, len(src)); copy(dst, src)",
+                        "dst := &src",
+                    ],
+                    "explanation": "Cả `dst = src` và `dst := src[:]` đều tạo slice chia sẻ cùng underlying array. Dùng `make` + `copy` để có slice thực sự độc lập.",
+                },
+            ],
+        },
+    },
+    "go_structs_interfaces": {
+        "lesson": {
+            "title": "Structs & Interfaces: Cách tiếp cận Hướng đối tượng của Go",
+            "content": """# Structs & Interfaces
+
+Go không có class. Thay vào đó dùng **structs** (dữ liệu) + **methods** (hành vi) + **interfaces** (contracts).
+
+## Structs
+
+```go
+type User struct {
+    ID       int
+    Name     string
+    Email    string
+    IsAdmin  bool
+}
+
+// Tạo
+u1 := User{ID: 1, Name: "Alice", Email: "alice@example.com"}
+u2 := User{1, "Bob", "bob@example.com", false} // positional (dễ vỡ, tránh dùng)
+
+// Pointer đến struct
+u3 := &User{Name: "Carol"}
+u3.Email = "carol@example.com" // Go auto-dereferences
+```
+
+### Methods
+
+Methods là hàm với **receiver**:
+
+```go
+// Value receiver — nhận một bản copy
+func (u User) String() string {
+    return fmt.Sprintf("%s <%s>", u.Name, u.Email)
+}
+
+// Pointer receiver — có thể sửa struct
+func (u *User) Promote() {
+    u.IsAdmin = true
+}
+
+// Sử dụng
+alice := User{Name: "Alice", Email: "alice@example.com"}
+fmt.Println(alice.String())
+alice.Promote() // Go tự động lấy địa chỉ: (&alice).Promote()
+```
+
+**Quy tắc:** Dùng pointer receiver khi cần sửa struct HOẶC khi struct lớn (tránh copy).
+
+### Struct Embedding (Composition thay vì kế thừa)
+
+```go
+type Base struct {
+    CreatedAt time.Time
+    UpdatedAt time.Time
+}
+
+type Product struct {
+    Base           // embedded — promotes fields & methods
+    Name  string
+    Price float64
+}
+
+p := Product{Name: "Laptop", Price: 999.99}
+p.CreatedAt = time.Now() // promoted từ Base
+```
+
+## Interfaces
+
+Interface định nghĩa **tập các method signatures**. Bất kỳ kiểu nào implement tất cả methods đều tự động thỏa mãn interface — không cần khai báo tường minh (**implicit implementation**).
+
+```go
+// Định nghĩa interface
+type Shape interface {
+    Area() float64
+    Perimeter() float64
+}
+
+// Implement cho Circle
+type Circle struct {
+    Radius float64
+}
+
+func (c Circle) Area() float64 {
+    return math.Pi * c.Radius * c.Radius
+}
+
+func (c Circle) Perimeter() float64 {
+    return 2 * math.Pi * c.Radius
+}
+
+// Implement cho Rectangle
+type Rectangle struct {
+    Width, Height float64
+}
+
+func (r Rectangle) Area() float64      { return r.Width * r.Height }
+func (r Rectangle) Perimeter() float64 { return 2 * (r.Width + r.Height) }
+
+// Dùng interface
+func printShape(s Shape) {
+    fmt.Printf("Area: %.2f, Perimeter: %.2f\\n", s.Area(), s.Perimeter())
+}
+
+printShape(Circle{Radius: 5})
+printShape(Rectangle{Width: 4, Height: 6})
+```
+
+### Empty Interface
+
+```go
+// interface{} (hoặc `any` từ Go 1.18+) chấp nhận mọi giá trị
+func printAnything(v interface{}) {
+    fmt.Println(v)
+}
+
+// Type assertion
+func describe(v interface{}) {
+    switch t := v.(type) {
+    case int:
+        fmt.Printf("int: %d\\n", t)
+    case string:
+        fmt.Printf("string: %s\\n", t)
+    default:
+        fmt.Printf("unknown type: %T\\n", t)
+    }
+}
+```
+
+### Key Interfaces trong Standard Library
+
+```go
+// fmt.Stringer — kiểm soát cách một kiểu in ra
+type Stringer interface {
+    String() string
+}
+
+// error — interface lỗi built-in
+type error interface {
+    Error() string
+}
+
+// io.Reader / io.Writer — dùng mọi nơi cho I/O
+type Reader interface {
+    Read(p []byte) (n int, err error)
+}
+```
+
+## Interface Best Practices
+
+```go
+// ✅ Nhận interfaces, trả về concrete types
+func NewService(db Database) *UserService { ... }
+
+// ✅ Interface nhỏ, tập trung (Go proverb: "interface càng lớn, abstraction càng yếu")
+type Writer interface {
+    Write(p []byte) (n int, err error)
+}
+
+// ✅ Định nghĩa interface ở nơi sử dụng (consumer side), không phải nơi định nghĩa type
+```
+
+## Mẹo Phỏng vấn
+"Go interface khác Java thế nào?" — Go dùng **implicit (structural) typing** — bạn không cần nói `implements Shape`. Nếu type của bạn có đúng methods, nó tự động thỏa mãn interface. Điều này cho phép loose coupling mà không cần shared inheritance hierarchies.""",
+        },
+        "quiz": {
+            "title": "Quiz: Structs & Interfaces",
+            "description": "Kiểm tra hiểu biết về Go structs, methods và interfaces.",
+            "questions": [
+                {
+                    "question": "Khi nào nên dùng pointer receiver thay vì value receiver?",
+                    "options": [
+                        "Luôn luôn — pointer receivers luôn nhanh hơn",
+                        "Khi method cần sửa struct, hoặc struct lớn",
+                        "Chỉ khi struct được định nghĩa trong package khác",
+                        "Khi gọi method trên interface",
+                    ],
+                    "explanation": "Dùng pointer receiver khi cần mutate struct (value receiver nhận bản copy), hoặc khi struct đủ lớn để việc copy trở nên đắt đỏ. Với method read-only nhỏ, value receiver là đủ.",
+                },
+                {
+                    "question": "Làm thế nào một type thỏa mãn interface trong Go?",
+                    "options": [
+                        "Bằng cách khai báo `implements InterfaceName`",
+                        "Bằng cách extend interface với `extends`",
+                        "Tự động, bằng cách implement tất cả methods trong interface",
+                        "Bằng cách đăng ký type với interface dùng `register()`",
+                    ],
+                    "explanation": "Go dùng implicit (structural) interface satisfaction. Bất kỳ type nào có tất cả methods interface yêu cầu đều tự động thỏa mãn — không cần khai báo tường minh.",
+                },
+                {
+                    "question": "Struct embedding đạt được điều gì trong Go?",
+                    "options": [
+                        "Kế thừa với method overriding như Java",
+                        "Composition — promotes fields và methods của embedded type vào outer struct",
+                        "Tạo bản copy dữ liệu của embedded struct",
+                        "Cho phép struct implement nhiều interfaces",
+                    ],
+                    "explanation": "Embedding promotes fields và methods của embedded type lên outer struct (composition, không phải kế thừa). Go ưu tiên composition hơn inheritance — không có class hierarchy.",
+                },
+                {
+                    "question": "`interface{}` (hoặc `any`) trong Go là gì?",
+                    "options": [
+                        "Một kiểu pointer đặc biệt",
+                        "Base class mà mọi type kế thừa",
+                        "Empty interface mà mọi type đều thỏa mãn — có thể chứa bất kỳ giá trị nào",
+                        "Một generic type parameter",
+                    ],
+                    "explanation": "`interface{}` (alias `any` từ Go 1.18+) là interface với zero methods. Vì mọi type implement ít nhất zero methods, mọi type đều thỏa mãn nó. Dùng type assertions hoặc type switches để lấy concrete value.",
+                },
+                {
+                    "question": "Go proverb về thiết kế interface là gì?",
+                    "options": [
+                        "Interface càng lớn, abstraction càng mạnh",
+                        "Luôn định nghĩa interface trong package nơi type được khai báo",
+                        "Interface càng lớn, abstraction càng yếu",
+                        "Ưu tiên concrete types hơn interfaces để có hiệu suất",
+                    ],
+                    "explanation": "Go interfaces hoạt động tốt nhất khi nhỏ và tập trung (như `io.Reader` với một method). Interface lớn khó implement và mock. Định nghĩa interface ở nơi chúng được tiêu thụ, không phải nơi types được định nghĩa.",
+                },
+            ],
+        },
+    },
+    "go_error_handling": {
+        "lesson": {
+            "title": "Xử lý Lỗi: Cách tiếp cận Tường minh của Go",
+            "content": """# Xử lý Lỗi trong Go
+
+Go không có exceptions. Lỗi là **values** được trả về từ hàm. Điều này làm cho error paths tường minh và không thể vô tình bị bỏ qua.
+
+## Pattern Cơ bản
+
+```go
+result, err := someFunction()
+if err != nil {
+    // xử lý lỗi
+    return fmt.Errorf("thao tác thất bại: %w", err)
+}
+// dùng result
+```
+
+Pattern "kiểm tra mọi lỗi" này là có chủ đích — nó buộc developer phải suy nghĩ về failure paths.
+
+## Interface `error`
+
+```go
+type error interface {
+    Error() string
+}
+```
+
+Bất kỳ type nào có method `Error() string` đều là một error.
+
+## Tạo Errors
+
+```go
+import "errors"
+import "fmt"
+
+// Lỗi chuỗi đơn giản
+err1 := errors.New("có lỗi xảy ra")
+
+// Lỗi có định dạng
+err2 := fmt.Errorf("không tìm thấy user %d", userID)
+
+// Wrapping error (Go 1.13+)
+err3 := fmt.Errorf("getUserByID: %w", originalErr)
+```
+
+## Custom Error Types
+
+```go
+type ValidationError struct {
+    Field   string
+    Message string
+}
+
+func (e *ValidationError) Error() string {
+    return fmt.Sprintf("validation thất bại trên trường '%s': %s", e.Field, e.Message)
+}
+
+// Trả về custom error
+func validateAge(age int) error {
+    if age < 0 {
+        return &ValidationError{Field: "age", Message: "phải không âm"}
+    }
+    return nil
+}
+
+// Kiểm tra type
+err := validateAge(-1)
+var valErr *ValidationError
+if errors.As(err, &valErr) {
+    fmt.Println("Trường:", valErr.Field)
+}
+```
+
+## Wrapping & Unwrapping
+
+```go
+// Wrap với %w để bảo toàn original error
+dbErr := errors.New("connection timeout")
+appErr := fmt.Errorf("fetchUser: %w", dbErr)
+
+// errors.Is — kiểm tra error có khớp ở bất kỳ đâu trong chain
+if errors.Is(appErr, dbErr) {
+    fmt.Println("đây là db error") // ✅ true
+}
+
+// errors.As — trích xuất type cụ thể từ chain
+var valErr *ValidationError
+if errors.As(err, &valErr) {
+    fmt.Println(valErr.Field)
+}
+```
+
+## Sentinel Errors
+
+```go
+// Định nghĩa package-level errors để caller match
+var (
+    ErrNotFound   = errors.New("không tìm thấy")
+    ErrUnauthorized = errors.New("không được phép")
+)
+
+func getUser(id int) (*User, error) {
+    if id == 0 {
+        return nil, ErrNotFound
+    }
+    // ...
+}
+
+// Caller kiểm tra
+if errors.Is(err, ErrNotFound) {
+    // xử lý not found
+}
+```
+
+## Panic & Recover
+
+`panic` dành cho **lỗi lập trình không thể phục hồi** (không phải lỗi runtime thông thường).
+
+```go
+// panic — dừng thực thi bình thường
+func mustPositive(n int) int {
+    if n <= 0 {
+        panic(fmt.Sprintf("mong đợi số dương, nhận %d", n))
+    }
+    return n
+}
+
+// recover — bắt panic (chỉ hoạt động trong defer)
+func safeDiv(a, b int) (result int, err error) {
+    defer func() {
+        if r := recover(); r != nil {
+            err = fmt.Errorf("phục hồi từ panic: %v", r)
+        }
+    }()
+    return a / b, nil
+}
+```
+
+**Quy tắc:** Dùng `error` cho failure mong đợi. Dùng `panic` chỉ cho bug (nil pointer, index out of bounds) hoặc trạng thái thực sự không thể phục hồi.
+
+## defer
+
+`defer` chạy hàm khi hàm bao quanh return — tuyệt vời cho cleanup:
+
+```go
+func readFile(path string) (string, error) {
+    f, err := os.Open(path)
+    if err != nil {
+        return "", err
+    }
+    defer f.Close() // luôn chạy, ngay cả khi có lỗi bên dưới
+
+    // đọc file...
+}
+```
+
+Deferred calls chạy theo thứ tự **LIFO** (last deferred = first to run).
+
+## Mẹo Phỏng vấn
+"Tại sao Go không có exceptions?" — Nhà thiết kế Go tin rằng exceptions dẫn đến hidden control flow và error handling kém. Explicit `error` returns làm cho failure paths hiển thị trong code. Sự verbose là có chủ đích — nó làm code dễ bảo trì hơn.""",
+        },
+        "quiz": {
+            "title": "Quiz: Xử lý Lỗi",
+            "description": "Kiểm tra kiến thức về pattern xử lý lỗi của Go.",
+            "questions": [
+                {
+                    "question": "Cách idiomatic để tạo simple error trong Go là gì?",
+                    "options": [
+                        'throw new Error("message")',
+                        'raise Exception("message")',
+                        'errors.New("message") hoặc fmt.Errorf("...")',
+                        "panic(\"message\")",
+                    ],
+                    "explanation": '`errors.New("message")` tạo static error đơn giản. `fmt.Errorf("...")` tạo formatted error và hỗ trợ wrapping với `%w`. Go không có exceptions hay throw.',
+                },
+                {
+                    "question": "`fmt.Errorf(\"thất bại: %w\", err)` làm gì khác so với `%v`?",
+                    "options": [
+                        "Cả hai giống hệt — %w và %v format giống nhau",
+                        "%w wrap original error để errors.Is/As có thể unwrap chain; %v chỉ format string",
+                        "%w panic nếu err là nil; %v thì không",
+                        "%w cho warnings; %v cho errors",
+                    ],
+                    "explanation": "`%w` wrap error, bảo toàn original trong chain để `errors.Is(wrapped, original)` trả về true. `%v` chỉ format error message thành string — original error bị mất.",
+                },
+                {
+                    "question": "Khi nào nên dùng `panic` trong Go?",
+                    "options": [
+                        "Bất cứ khi nào có lỗi trong chương trình",
+                        "Như một cách thay thế cho việc trả về errors từ hàm",
+                        "Chỉ cho lỗi lập trình không thể phục hồi hoặc trạng thái không thể xảy ra, không phải runtime failure mong đợi",
+                        "Khi muốn thoát chương trình ngay lập tức",
+                    ],
+                    "explanation": "`panic` dành cho programming bugs (nil dereference, impossible state) — không phải cho failure mong đợi như network errors hay missing records. Failure mong đợi nên dùng `error` return pattern.",
+                },
+                {
+                    "question": "Sentinel error trong Go là gì?",
+                    "options": [
+                        "Error gây ra panic",
+                        "Biến error package-level mà caller có thể kiểm tra với errors.Is()",
+                        "Custom error type với extra fields",
+                        "Error chỉ được trả về từ hàm main",
+                    ],
+                    "explanation": "Sentinel errors là biến `var` package-level (vd: `var ErrNotFound = errors.New(\"not found\")`). Caller dùng `errors.Is(err, ErrNotFound)` để kiểm tra mà không cần so sánh chuỗi.",
+                },
+                {
+                    "question": "`defer` được dùng để làm gì trong Go?",
+                    "options": [
+                        "Trì hoãn goroutine khởi động",
+                        "Chạy hàm sau khi hàm bao quanh return — hữu ích cho cleanup",
+                        "Đánh dấu error là deferred cho đến sau",
+                        "Tạm dừng thực thi trong khoảng thời gian đặt trước",
+                    ],
+                    "explanation": "`defer` lên lịch chạy function call khi hàm chứa nó thoát (bất kể cách nào). Lý tưởng cho cleanup: `defer file.Close()`, `defer mutex.Unlock()`, v.v.",
+                },
+            ],
+        },
+    },
+    "go_concurrency": {
+        "lesson": {
+            "title": "Goroutines & Channels: Mô hình Concurrency của Go",
+            "content": """# Goroutines & Channels
+
+Go được xây dựng cho concurrency. Cách tiếp cận: **goroutines** (luồng nhẹ) + **channels** (giao tiếp) — được tóm tắt bởi Go proverb:
+
+> "Don't communicate by sharing memory; share memory by communicating."
+
+## Goroutines
+
+Goroutine là lightweight thread được quản lý bởi Go runtime. Khởi động một goroutine tốn ~2KB stack (so với ~1MB cho OS thread).
+
+```go
+// Khởi động goroutine với từ khóa `go`
+go func() {
+    fmt.Println("đang chạy trong goroutine")
+}()
+
+// Named function
+go processOrder(orderID)
+
+// main() thoát khi nó return — goroutines có thể bị kill!
+// Dùng sync mechanisms để đợi
+```
+
+## sync.WaitGroup — đợi goroutines
+
+```go
+import "sync"
+
+var wg sync.WaitGroup
+
+for i := 0; i < 5; i++ {
+    wg.Add(1)
+    go func(id int) {
+        defer wg.Done()
+        fmt.Printf("Worker %d xong\\n", id)
+    }(i)
+}
+
+wg.Wait() // block đến khi tất cả goroutines gọi Done()
+```
+
+## Channels
+
+Channels cho phép goroutines giao tiếp an toàn.
+
+```go
+// Unbuffered channel — sender block đến khi receiver sẵn sàng
+ch := make(chan int)
+
+go func() {
+    ch <- 42 // send
+}()
+
+value := <-ch // receive (block đến khi có dữ liệu)
+fmt.Println(value) // 42
+
+// Buffered channel — sender chỉ block khi buffer đầy
+buffered := make(chan string, 3)
+buffered <- "a"
+buffered <- "b"
+buffered <- "c"
+// buffered <- "d" // sẽ block — buffer đầy
+
+// Đóng channel
+close(ch) // receivers nhận zero value sau khi close
+
+// Receive với ok check
+v, ok := <-ch
+if !ok {
+    fmt.Println("channel đã đóng")
+}
+
+// Range qua channel (đọc đến khi đóng)
+for msg := range msgChan {
+    fmt.Println(msg)
+}
+```
+
+## Ví dụ Thực tế: Fan-out với goroutines
+
+```go
+func processURLs(urls []string) []string {
+    results := make([]string, len(urls))
+    var wg sync.WaitGroup
+
+    for i, url := range urls {
+        wg.Add(1)
+        go func(i int, url string) {
+            defer wg.Done()
+            // fetch url...
+            results[i] = "kết quả cho " + url
+        }(i, url)
+    }
+
+    wg.Wait()
+    return results
+}
+```
+
+## select — multiplexing channels
+
+```go
+select {
+case msg := <-ch1:
+    fmt.Println("từ ch1:", msg)
+case msg := <-ch2:
+    fmt.Println("từ ch2:", msg)
+case <-time.After(1 * time.Second):
+    fmt.Println("timeout!")
+default:
+    fmt.Println("không có hoạt động")
+}
+```
+
+`select` chọn case sẵn sàng ngẫu nhiên nếu nhiều case cùng sẵn sàng.
+
+## sync.Mutex — bảo vệ shared state
+
+```go
+type SafeCounter struct {
+    mu    sync.Mutex
+    count int
+}
+
+func (c *SafeCounter) Inc() {
+    c.mu.Lock()
+    defer c.mu.Unlock()
+    c.count++
+}
+
+func (c *SafeCounter) Value() int {
+    c.mu.Lock()
+    defer c.mu.Unlock()
+    return c.count
+}
+```
+
+## Các Pattern Phổ biến
+
+### Worker Pool
+
+```go
+func workerPool(jobs <-chan int, results chan<- int, numWorkers int) {
+    var wg sync.WaitGroup
+    for w := 0; w < numWorkers; w++ {
+        wg.Add(1)
+        go func() {
+            defer wg.Done()
+            for job := range jobs {
+                results <- job * job // xử lý job
+            }
+        }()
+    }
+    wg.Wait()
+    close(results)
+}
+```
+
+### Context để cancellation
+
+```go
+ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+defer cancel()
+
+select {
+case result := <-doWork(ctx):
+    fmt.Println(result)
+case <-ctx.Done():
+    fmt.Println("timeout:", ctx.Err())
+}
+```
+
+## Các Lỗi Phổ biến
+
+| Lỗi | Cách sửa |
+|-----|----------|
+| Goroutine leak (không bao giờ dừng) | Dùng `context.Cancel()` hoặc done channels |
+| Race condition trên shared variable | Dùng `sync.Mutex` hoặc channels |
+| Đóng nil channel | Luôn khởi tạo channels với `make` |
+| Đóng channel hai lần | Chỉ sender mới nên close |
+
+## Mẹo Phỏng vấn
+"Sự khác biệt giữa goroutines và OS threads?" — Goroutines được quản lý bởi Go runtime (M:N threading), bắt đầu với ~2KB stack (phát triển động), có thể chạy hàng triệu cái đồng thời. OS threads nặng hơn (~1MB stack, context switch do OS quản lý).""",
+        },
+        "quiz": {
+            "title": "Quiz: Goroutines & Channels",
+            "description": "Kiểm tra hiểu biết về mô hình concurrency của Go.",
+            "questions": [
+                {
+                    "question": "Làm thế nào để khởi động goroutine trong Go?",
+                    "options": [
+                        "new Thread(() -> func()).start()",
+                        "threading.Thread(target=func).start()",
+                        "go funcName() hoặc go func() { ... }()",
+                        "async func()",
+                    ],
+                    "explanation": "Từ khóa `go` trước function call khởi động nó như một goroutine. Cả named function (`go processOrder(id)`) và anonymous function (`go func() { ... }()`) đều hoạt động.",
+                },
+                {
+                    "question": "Điều gì xảy ra với unbuffered channel khi sender gửi giá trị?",
+                    "options": [
+                        "Giá trị bị hủy nếu không có receiver sẵn sàng",
+                        "Sender block cho đến khi receiver sẵn sàng nhận",
+                        "Giá trị được lưu trong hàng đợi",
+                        "Panic xảy ra nếu không có receiver sẵn sàng",
+                    ],
+                    "explanation": "Unbuffered channel (`make(chan T)`) đồng bộ sender và receiver — sender block cho đến khi receiver đọc giá trị, và ngược lại. Đây là điểm đồng bộ.",
+                },
+                {
+                    "question": "`sync.WaitGroup` được dùng để làm gì?",
+                    "options": [
+                        "Giới hạn số goroutines chạy đồng thời",
+                        "Đợi một tập hợp goroutines hoàn thành trước khi tiếp tục",
+                        "Đồng bộ channel sends và receives",
+                        "Tạo pool goroutines tái sử dụng",
+                    ],
+                    "explanation": "`sync.WaitGroup` theo dõi goroutines. Gọi `wg.Add(1)` trước khi launch, `wg.Done()` (thường qua defer) trong goroutine, và `wg.Wait()` để block đến khi tất cả goroutines hoàn thành.",
+                },
+                {
+                    "question": "Câu lệnh `select` làm gì trong Go?",
+                    "options": [
+                        "Chọn goroutine ngẫu nhiên để chạy",
+                        "Đợi tất cả channels có dữ liệu",
+                        "Block cho đến khi một trong các channel case sẵn sàng, rồi thực thi case đó",
+                        "Lọc giá trị từ channel",
+                    ],
+                    "explanation": "`select` đợi một trong các channel case sẵn sàng. Nếu nhiều case cùng sẵn sàng, một case được chọn ngẫu nhiên. Case `default` làm nó non-blocking.",
+                },
+                {
+                    "question": "Nguyên nhân phổ biến của goroutine leak là gì?",
+                    "options": [
+                        "Dùng quá nhiều WaitGroups",
+                        "Đóng channel đã được đóng",
+                        "Goroutine bị block trên channel receive không có sender, chạy mãi mãi",
+                        "Tạo goroutines trong vòng lặp for",
+                    ],
+                    "explanation": "Goroutine leak xảy ra khi goroutine bị kẹt chờ (vd: block trên channel không bao giờ được gửi) và không bao giờ được cleanup. Dùng `context.WithCancel` hoặc done channels để báo hiệu goroutines dừng.",
+                },
+            ],
+        },
+    },
+}
 
 SD_LESSON_TRANSLATIONS_VI: dict[str, dict] = {
     "load_balancing": {
