@@ -1207,6 +1207,7 @@ def seed_translations(session: Session) -> None:
         DOMAIN_TRANSLATIONS_VI,
         ENGLISH_IT_LESSON_TRANSLATIONS_VI,
         GO_LESSON_TRANSLATIONS_VI,
+        LLM_LESSON_TRANSLATIONS_VI,
         NODEJS_LESSON_TRANSLATIONS_VI,
         SD_LESSON_TRANSLATIONS_VI,
     )
@@ -1297,6 +1298,36 @@ def seed_translations(session: Session) -> None:
 
     # ── Node.js Lessons + Quizzes ──────────────────────────────────────────────
     for topic_name, data in NODEJS_LESSON_TRANSLATIONS_VI.items():
+        cat = session.exec(select(ScenarioCategory).where(ScenarioCategory.name == topic_name)).first()
+        if not cat:
+            continue
+        lesson = session.exec(
+            select(LessonModel).where(LessonModel.category_id == cat.id)
+        ).first()
+        if lesson:
+            lesson_vi = data.get("lesson", {})
+            lesson.translations = {"vi": {"title": lesson_vi.get("title", ""), "content": lesson_vi.get("content", "")}}
+            session.add(lesson)
+
+            quiz = session.exec(select(Quiz).where(Quiz.lesson_id == lesson.id)).first()
+            if quiz:
+                quiz_vi = data.get("quiz", {})
+                quiz.translations = {"vi": {"title": quiz_vi.get("title", ""), "description": quiz_vi.get("description", "")}}
+                session.add(quiz)
+                questions = session.exec(select(QuizQuestion).where(QuizQuestion.quiz_id == quiz.id).order_by(QuizQuestion.order_index)).all()
+                q_translations = quiz_vi.get("questions", [])
+                for i, q in enumerate(questions):
+                    if i < len(q_translations):
+                        qt = q_translations[i]
+                        q.translations = {"vi": {
+                            "question": qt.get("question", ""),
+                            "options": qt.get("options", q.options),
+                            "explanation": qt.get("explanation", ""),
+                        }}
+                        session.add(q)
+
+    # ── LLM Lessons + Quizzes ──────────────────────────────────────────────────
+    for topic_name, data in LLM_LESSON_TRANSLATIONS_VI.items():
         cat = session.exec(select(ScenarioCategory).where(ScenarioCategory.name == topic_name)).first()
         if not cat:
             continue
